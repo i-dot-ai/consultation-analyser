@@ -28,6 +28,7 @@ hdbscan = "^0.8.33"
 sentence-transformers = "^2.5.1"
 bertopic = "^0.16.0"
 scikit-learn = "^1.4.1.post1"
+umap-learn = "^0.5.5"
 
 
 [tool.poetry.group.development.dependencies]
@@ -39,6 +40,9 @@ django-extensions = "^3.2.3"
 [tool.mypy]
 files = '**/*.py'
 exclude= ['^consultation_analyser/consultations/migrations/']
+
+
+
 
 
 
