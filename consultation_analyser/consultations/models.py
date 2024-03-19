@@ -58,6 +58,7 @@ class ConsultationResponse(UUIDPrimaryKeyModel, TimeStampedModel):
 
 
 class Theme(UUIDPrimaryKeyModel, TimeStampedModel):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
     label = models.CharField(max_length=256, blank=True)
     summary = models.TextField(blank=True)
     keywords = models.JSONField(default=list)
