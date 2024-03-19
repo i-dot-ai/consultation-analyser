@@ -540,6 +540,18 @@ files = [
 
 [package.dependencies]
 webtest = ">=1.3.3"
+name = "django-types"
+version = "0.19.1"
+description = "Type stubs for Django"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "django_types-0.19.1-py3-none-any.whl", hash = "sha256:b3f529de17f6374d41ca67232aa01330c531bbbaa3ac4097896f31ac33c96c30"},
+    {file = "django_types-0.19.1.tar.gz", hash = "sha256:5ae7988612cf6fbc357b018bbc3b3a878b65e04275cc46e0d35d66a708daff12"},
+]
+
+[package.dependencies]
+types-psycopg2 = ">=2.9.21.13"
 
 [[package]]
 name = "factory-boy"
@@ -3093,6 +3105,17 @@ torch-vision = ["Pillow (>=10.0.1,<=15.0)", "torchvision"]
 torchhub = ["filelock", "huggingface-hub (>=0.19.3,<1.0)", "importlib-metadata", "numpy (>=1.17)", "packaging (>=20.0)", "protobuf", "regex (!=2019.12.17)", "requests", "sentencepiece (>=0.1.91,!=0.1.92)", "tokenizers (>=0.14,<0.19)", "torch", "tqdm (>=4.27)"]
 video = ["av (==9.2.0)", "decord (==0.6.0)"]
 vision = ["Pillow (>=10.0.1,<=15.0)"]
+
+[[package]]
+name = "types-psycopg2"
+version = "2.9.21.20240311"
+description = "Typing stubs for psycopg2"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-psycopg2-2.9.21.20240311.tar.gz", hash = "sha256:722945dffa6a729bebc660f14137f37edfcead5a2c15eb234212a7d017ee8072"},
+    {file = "types_psycopg2-2.9.21.20240311-py3-none-any.whl", hash = "sha256:2e137ae2b516ee0dbaab6f555086b6cfb723ba4389d67f551b0336adf4efcf1b"},
+]
 
 [[package]]
 name = "typing-extensions"
