@@ -72,5 +72,8 @@ def get_themes_for_consultation(consultation_id: UUID) -> None:
         get_themes_for_question(question)
 
 
-# TODO - what to do with topic -1
+# TODO - what to do with topic -1 (outliers)
 # https://github.com/MaartenGr/BERTopic
+
+
+# TODO - Generate theme summaries using LLM
