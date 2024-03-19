@@ -35,19 +35,11 @@ def get_topics(free_text_responses_list: List, embeddings: np.ndarray) -> BERTop
     return topic_model
 
 
-# # TODO: What is the 2D embedding for?
-# def get_2d_embeddings(embeddings):
-#     umap_embeddings = UMAP(
-#         n_neighbors=15, n_components=2, min_dist=0.0, metric="cosine", random_state=12
-#     ).fit_transform(embeddings)
-#     return umap_embeddings
-
-
 def save_themes(topic_model: BERTopic, question_id: UUID) -> None:
-    # TODO - add question_id to Theme model (maybe)
+    question = models.Question.objects.get(id=question_id)
     topic_df = topic_model.get_topic_info()
     for row in topic_df.itertuples():
-        theme = models.Theme(keywords=row["Representation"], label=["Name"])
+        theme = models.Theme(keywords=row["Representation"], label=["Name"], question=question)
         theme.save()
 
 
