@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import List, Dict, Any
+from typing import List
 
 from umap.umap_ import UMAP
 from sentence_transformers import SentenceTransformer
@@ -7,25 +7,10 @@ from hdbscan import HDBSCAN
 from bertopic import BERTopic
 from bertopic.vectorizers import ClassTfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-import pandas as pd
 import numpy as np
+from django.db.models import QuerySet
 
 from consultation_analyser.consultations import models
-
-
-def get_answers_text_for_question(question_id: UUID) -> List[Dict[str, Any]]:
-    answers = models.Answer.objects.filter(question__id=question_id).order_by("created_at").values("id", "free_text")
-    return answers
-
-
-def get_free_text_responses_from_answers(answers: List[Dict[str, Any]]) -> List:
-    free_text_responses = [answer["free_text"] for answer in answers]
-    return free_text_responses
-
-
-def get_answers_text_df(answers: List[Dict[str, Any]]) -> pd.DataFrame:
-    df = pd.DataFrame(answers)
-    return df
 
 
 def get_embeddings_for_question(
@@ -50,24 +35,50 @@ def get_topics(free_text_responses_list: List, embeddings: np.ndarray) -> BERTop
     return topic_model
 
 
-# TODO: What is the 2D embedding for?
-def get_2d_embeddings(embeddings):
-    umap_embeddings = UMAP(
-        n_neighbors=15, n_components=2, min_dist=0.0, metric="cosine", random_state=12
-    ).fit_transform(embeddings)
-    return umap_embeddings
+# # TODO: What is the 2D embedding for?
+# def get_2d_embeddings(embeddings):
+#     umap_embeddings = UMAP(
+#         n_neighbors=15, n_components=2, min_dist=0.0, metric="cosine", random_state=12
+#     ).fit_transform(embeddings)
+#     return umap_embeddings
 
 
-# def save_themes(topic_model):
-#     # TODO - add question_id to Theme model (maybe)
-#     topic_df = topic_model.get_topic_info()
-#     topic_id_lookup = {} # Mapping topic_id from model to UUID in DB
-#     for row in topic_df.itertuples():
-#         theme = models.Theme(keywords=row[??], label=[??]) #TODO - what are field names
-#         theme.save()
-#         topic_id_lookup[row["ID"]] = theme.id
-#         # TODO - update with the correc t
-#         # save each topic to theme model
-#         # add column to df with theme ID
+def save_themes(topic_model: BERTopic, question_id: UUID) -> None:
+    # TODO - add question_id to Theme model (maybe)
+    topic_df = topic_model.get_topic_info()
+    for row in topic_df.itertuples():
+        theme = models.Theme(keywords=row["Representation"], label=["Name"])
+        theme.save()
 
-#     return topic_id_lookup
+
+def save_answers(topic_model: BERTopic, question_id: UUID, answers_qs: QuerySet) -> None:
+    free_text_responses = answers_qs.values_list("free_text", flat=True)
+    answers_id_list = answers_qs.values_list("id", flat=True)
+    # Assign topics to answers
+    answers_df = topic_model.get_document_info(free_text_responses)
+    # TODO - seems a bit fragile, relies on answers staying in the same order
+    answers_df["id"] = answers_id_list
+    for row in answers_df.itertuples():
+        theme = models.Theme.objects.get(question__id=question_id, label=row["Name"])
+        answer = models.Answer.objects.get(id=row["id"])
+        answer.theme = theme
+        answer.save()
+
+
+def get_themes_for_question(question_id: UUID) -> None:
+    answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
+    free_text_responses = answers_qs.values_list("free_text", flat=True)
+    embeddings = get_embeddings_for_question(free_text_responses)
+    topic_model = get_topics(free_text_responses, embeddings)
+    save_themes(topic_model, question_id)
+    save_answers(topic_model, question_id, answers_qs)
+
+
+def get_themes_for_consultation(consultation_id: UUID) -> None:
+    questions = models.Question.objects.filter(section__consultation__id=consultation_id, has_free_text=True)
+    for question in questions:
+        get_themes_for_question(question)
+
+
+# TODO - what to do with topic -1
+# https://github.com/MaartenGr/BERTopic
