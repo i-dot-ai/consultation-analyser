@@ -39,37 +39,36 @@ def save_themes(topic_model: BERTopic, question_id: UUID) -> None:
     question = models.Question.objects.get(id=question_id)
     topic_df = topic_model.get_topic_info()
     for row in topic_df.itertuples():
-        theme = models.Theme(keywords=row["Representation"], label=["Name"], question=question)
-        theme.save()
+        models.Theme.objects.get_or_create(keywords=row.Representation, label=row.Name, question=question)
 
 
-def save_answers(topic_model: BERTopic, question_id: UUID, answers_qs: QuerySet) -> None:
-    free_text_responses = answers_qs.values_list("free_text", flat=True)
+def save_themes_to_answers(topic_model: BERTopic, question_id: UUID, answers_qs: QuerySet) -> None:
+    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
     answers_id_list = answers_qs.values_list("id", flat=True)
     # Assign topics to answers
     answers_df = topic_model.get_document_info(free_text_responses)
-    # TODO - seems a bit fragile, relies on answers staying in the same order
+    # Answers must be in the same order
     answers_df["id"] = answers_id_list
     for row in answers_df.itertuples():
-        theme = models.Theme.objects.get(question__id=question_id, label=row["Name"])
-        answer = models.Answer.objects.get(id=row["id"])
+        theme = models.Theme.objects.get(question__id=question_id, label=row.Name)
+        answer = models.Answer.objects.get(id=row.id)
         answer.theme = theme
         answer.save()
 
 
 def get_themes_for_question(question_id: UUID) -> None:
     answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
-    free_text_responses = answers_qs.values_list("free_text", flat=True)
+    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
     embeddings = get_embeddings_for_question(free_text_responses)
     topic_model = get_topics(free_text_responses, embeddings)
     save_themes(topic_model, question_id)
-    save_answers(topic_model, question_id, answers_qs)
+    save_themes_to_answers(topic_model, question_id, answers_qs)
 
 
 def get_themes_for_consultation(consultation_id: UUID) -> None:
     questions = models.Question.objects.filter(section__consultation__id=consultation_id, has_free_text=True)
     for question in questions:
-        get_themes_for_question(question)
+        get_themes_for_question(question.id)
 
 
 # TODO - what to do with topic -1 (outliers)
