@@ -21,7 +21,7 @@ def get_embeddings_for_question(
     return embeddings
 
 
-def get_topics(free_text_responses_list: List, embeddings: np.ndarray) -> BERTopic:
+def get_topic_model(free_text_responses_list: List, embeddings: np.ndarray) -> BERTopic:
     umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric="cosine", random_state=12)
     hdbscan_model = HDBSCAN(
         min_cluster_size=3, metric="euclidean", cluster_selection_method="eom", prediction_data=True
@@ -56,11 +56,63 @@ def save_themes_to_answers(topic_model: BERTopic, question_id: UUID, answers_qs:
         answer.save()
 
 
+def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> None:
+    # Answers need to be in the same order
+    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
+    answers_id_list = answers_qs.values_list("id", flat=True)
+    # Assign topics to answers
+    answers_df = topic_model.get_document_info(free_text_responses)
+    answers_df["id"] = answers_id_list
+    # Join DFs
+    return answers_df
+
+
+def save_answer_theme(row):  # Row in df
+    answer_id = row.id
+    topic_keywords = row.Representation
+    topic_label = row.Name
+    answer = models.Answer.objects.get(answer_id=answer_id)
+    question = answer.question
+    theme_qs = models.Theme.objects.filter(answer__question=question, keywords=topic_keywords, label=topic_label)
+    if theme_qs.exists():
+        theme = theme_qs.first()
+    else:
+        theme = models.Theme(keywords=topic_keywords, label=topic_label)
+        theme.save()
+    answer.theme = theme
+    answer.save()
+    return answer
+
+
+# # # Now try without having a separate question field
+# # def get_answers_and_themes(answers_qs)
+
+# q = models.Theme.objects.filter(answer__question_id="175a0d94-ed55-4b8e-a666-fbb6419924a7")
+
+
+# def save_answers_themes(topic_model, answers_qs):
+#     question = answers_qs.first().question
+#     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
+#     answers_id_list = answers_qs.values_list("id", flat=True)
+#     answers_df = topic_model.get_document_info(free_text_responses)
+#     # Answers must be in the same order
+#     answers_df["id"] = answers_id_list
+#     topic_df = topic_model.get_topic_info()
+#     # join answers and topic df -
+#     for row in answers_df.itertuples():
+#         # Check if this theme exists for this question, if not, create it
+#         theme = models.Theme.objects.get(question__id=question_id, label=row.Name)
+#         answer = models.Answer.objects.get(id=row.id)
+#         answer.theme = theme
+#         answer.save()
+
+
 def get_themes_for_question(question_id: UUID) -> None:
     answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
     embeddings = get_embeddings_for_question(free_text_responses)
-    topic_model = get_topics(free_text_responses, embeddings)
+    topic_model = get_topic_model(free_text_responses, embeddings)
+
     save_themes(topic_model, question_id)
     save_themes_to_answers(topic_model, question_id, answers_qs)
 
