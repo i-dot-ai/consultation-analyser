@@ -9,6 +9,7 @@ from bertopic.vectorizers import ClassTfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 from django.db.models import QuerySet
+import pandas as pd
 
 from consultation_analyser.consultations import models
 
@@ -35,86 +36,52 @@ def get_topic_model(free_text_responses_list: List, embeddings: np.ndarray) -> B
     return topic_model
 
 
-def save_themes(topic_model: BERTopic, question_id: UUID) -> None:
-    question = models.Question.objects.get(id=question_id)
-    topic_df = topic_model.get_topic_info()
-    for row in topic_df.itertuples():
-        models.Theme.objects.get_or_create(keywords=row.Representation, label=row.Name, question=question)
-
-
-def save_themes_to_answers(topic_model: BERTopic, question_id: UUID, answers_qs: QuerySet) -> None:
-    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
-    answers_id_list = answers_qs.values_list("id", flat=True)
-    # Assign topics to answers
-    answers_df = topic_model.get_document_info(free_text_responses)
-    # Answers must be in the same order
-    answers_df["id"] = answers_id_list
-    for row in answers_df.itertuples():
-        theme = models.Theme.objects.get(question__id=question_id, label=row.Name)
-        answer = models.Answer.objects.get(id=row.id)
-        answer.theme = theme
-        answer.save()
-
-
-def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> None:
-    # Answers need to be in the same order
+def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> pd.DataFrame:
+    # Answers/IDs need to be in the same order - answers_qs has been sorted
     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
     answers_id_list = answers_qs.values_list("id", flat=True)
     # Assign topics to answers
     answers_df = topic_model.get_document_info(free_text_responses)
     answers_df["id"] = answers_id_list
-    # Join DFs
+    answers_df = answers_df[["id", "Topic", "Name", "Representation"]]
     return answers_df
 
 
-def save_answer_theme(row):  # Row in df
-    answer_id = row.id
-    topic_keywords = row.Representation
-    topic_label = row.Name
-    answer = models.Answer.objects.get(answer_id=answer_id)
-    question = answer.question
-    theme_qs = models.Theme.objects.filter(answer__question=question, keywords=topic_keywords, label=topic_label)
+def get_or_create_theme_for_question(question: models.Question, label: str, keywords: str) -> models.Theme:
+    # Themes are unique up to question and label (and keywords)
+    theme_qs = models.Theme.objects.filter(answer__question=question, keywords=keywords, label=label)
     if theme_qs.exists():
         theme = theme_qs.first()
     else:
-        theme = models.Theme(keywords=topic_keywords, label=topic_label)
+        theme = models.Theme(keywords=keywords, label=label)
         theme.save()
+    return theme
+
+
+def save_answer_theme(answer_row):
+    # TODO - fix the mypy errors
+    # def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
+    # Row of answer_df with free_text answers and topic classification
+    answer = models.Answer.objects.get(answer_id=answer_row.id)
+    theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)
     answer.theme = theme
     answer.save()
     return answer
 
 
-# # # Now try without having a separate question field
-# # def get_answers_and_themes(answers_qs)
-
-# q = models.Theme.objects.filter(answer__question_id="175a0d94-ed55-4b8e-a666-fbb6419924a7")
-
-
-# def save_answers_themes(topic_model, answers_qs):
-#     question = answers_qs.first().question
-#     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
-#     answers_id_list = answers_qs.values_list("id", flat=True)
-#     answers_df = topic_model.get_document_info(free_text_responses)
-#     # Answers must be in the same order
-#     answers_df["id"] = answers_id_list
-#     topic_df = topic_model.get_topic_info()
-#     # join answers and topic df -
-#     for row in answers_df.itertuples():
-#         # Check if this theme exists for this question, if not, create it
-#         theme = models.Theme.objects.get(question__id=question_id, label=row.Name)
-#         answer = models.Answer.objects.get(id=row.id)
-#         answer.theme = theme
-#         answer.save()
+def save_themes_to_answers(answers_topics_df: pd.DataFrame) -> None:
+    for row in answers_topics_df.itertuples():
+        save_answer_theme(row)
 
 
 def get_themes_for_question(question_id: UUID) -> None:
+    # Need to fix order
     answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
     embeddings = get_embeddings_for_question(free_text_responses)
     topic_model = get_topic_model(free_text_responses, embeddings)
-
-    save_themes(topic_model, question_id)
-    save_themes_to_answers(topic_model, question_id, answers_qs)
+    answers_topics_df = get_answers_and_topics(topic_model, answers_qs)
+    save_themes_to_answers(answers_topics_df)
 
 
 def get_themes_for_consultation(consultation_id: UUID) -> None:
