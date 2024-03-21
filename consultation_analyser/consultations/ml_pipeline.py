@@ -81,6 +81,9 @@ def save_themes_for_question(question_id: UUID) -> None:
     embeddings = get_embeddings_for_question(free_text_responses)
     topic_model = get_topic_model(free_text_responses, embeddings)
     answers_topics_df = get_answers_and_topics(topic_model, answers_qs)
+    print("answers_topics_df")
+    print(answers_topics_df)
+    print("====")
     save_themes_to_answers(answers_topics_df)
 
 
