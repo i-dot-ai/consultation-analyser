@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import List
+from typing import List, NamedTuple
 
 from umap.umap_ import UMAP
 from sentence_transformers import SentenceTransformer
@@ -58,12 +58,11 @@ def get_or_create_theme_for_question(question: models.Question, label: str, keyw
     return theme
 
 
-def save_answer_theme(answer_row):
-    # TODO - fix the mypy errors
-    # def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
+# TODO - sort out mypy error
+def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
     # Row of answer_df with free_text answers and topic classification
-    answer = models.Answer.objects.get(id=answer_row.id)
-    theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)
+    answer = models.Answer.objects.get(id=answer_row.id)  # type: ignore
+    theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)  # type: ignore
     answer.theme = theme
     answer.save()
     return answer
