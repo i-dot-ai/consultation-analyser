@@ -48,11 +48,12 @@ def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> pd.Da
 
 
 def get_or_create_theme_for_question(question: models.Question, label: str, keywords: str) -> models.Theme:
-    # Themes are unique up to question and label (and keywords)
-    theme_qs = models.Theme.objects.filter(answer__question=question, keywords=keywords, label=label)
-    if theme_qs.exists():
-        theme = theme_qs.first()
-    else:
+    # Themes should be unique up to question and label (and keywords)
+    # TODO - how can we enforce this?
+    # TODO - This isn't working
+    try:
+        theme = models.Theme.objects.get(answer__question=question, keywords=keywords, label=label)
+    except models.Theme.DoesNotExist:
         theme = models.Theme(keywords=keywords, label=label)
         theme.save()
     return theme
@@ -73,7 +74,7 @@ def save_themes_to_answers(answers_topics_df: pd.DataFrame) -> None:
         save_answer_theme(row)
 
 
-def get_themes_for_question(question_id: UUID) -> None:
+def save_themes_for_question(question_id: UUID) -> None:
     # Need to fix order
     answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
     free_text_responses = list(answers_qs.values_list("free_text", flat=True))
@@ -83,10 +84,10 @@ def get_themes_for_question(question_id: UUID) -> None:
     save_themes_to_answers(answers_topics_df)
 
 
-def get_themes_for_consultation(consultation_id: UUID) -> None:
+def save_themes_for_consultation(consultation_id: UUID) -> None:
     questions = models.Question.objects.filter(section__consultation__id=consultation_id, has_free_text=True)
     for question in questions:
-        get_themes_for_question(question.id)
+        save_themes_for_question(question.id)
 
 
 # TODO - what to do with topic -1 (outliers)
