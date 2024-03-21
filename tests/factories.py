@@ -117,4 +117,5 @@ class AnswerFactory(factory.django.DjangoModelFactory):
 
     question = factory.SubFactory(QuestionFactory)
     consultation_response = factory.SubFactory(ConsultationResponseFactory)
-    theme = factory.SubFactory(ThemeFactory)
+
+    theme = factory.LazyAttribute(lambda o: ThemeFactory() if o.free_text else None)

@@ -62,7 +62,7 @@ def save_answer_theme(answer_row):
     # TODO - fix the mypy errors
     # def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
     # Row of answer_df with free_text answers and topic classification
-    answer = models.Answer.objects.get(answer_id=answer_row.id)
+    answer = models.Answer.objects.get(id=answer_row.id)
     theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)
     answer.theme = theme
     answer.save()
