@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: i.AI Consultation analyser
+  version: v0.1
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: Successful operation
+components:
+  schemas:
+    Consultation:
+      type: object
+      description: A Consultation contains one or more Sections
+      properties:
+        name:
+          type: string
+          description: The name of the consultation
+          example: 'Consultation on Kit Kats'
+    Section:
+      type: object
+      description: Each Section contains one or more Questions
+      properties:
+        name:
+          type: string
+          description: The name of the section
+          example: 'When to enforce a Kit Kat ban'
+    Question:
+      type: object
+      description: Each Question will have one or more Answers
+      properties:
+        text:
+          type: string
+          description: The question text
+          example: 'Should Kit Kats be banned on Tuesdays'
+        has_free_text:
+          type: boolean
+          description: Does this question have a free text component?
+        multiple_choice_options:
+          type: array
+          description: The options for the multiple choice part of this question, if it has a multiple choice component
+          nullable: true
+          items:
+            type: string
+            example:
+              - 'Yes'
+              - 'No'
+              - "I don't know"
+    Answer:
+      type: object
+      description: Each Answer is associated with a Question and belongs to a ConsultationResponse
+      properties:
+        multiple_choice:
+          type: array
+          description: Responses to the multiple choice part of the question, if any
+          nullable: true
+          items:
+            type: string
+            description: A selected option
+            example:
+              - 'Yes'
+        free_text:
+          type: string
+          description: The answer to the free text part of the question, if any
+          nullable: true
+    ConsultationResponse:
+      type: object
+      description: Placeholder for response-level information such as demographics, responding-in-the-capacity-of, etc.
+      

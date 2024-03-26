@@ -5,6 +5,9 @@ CURRENT_GIT_SHA := $(shell git rev-parse HEAD | cut -c 1-8)
 help: ## Show this help
 	@grep -E '^[a-zA-Z\.\-\_]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+consultation_analyser/consultations/public_schema.py: consultation_analyser/public_schema.yaml
+	poetry run datamodel-codegen --input $< --output $@
+
 .PHONY: setup_dev_db
 setup_dev_db: ## Set up the development db on a local postgres
 	createdb consultations_dev
