@@ -51,17 +51,17 @@ def get_or_create_theme_for_question(question: models.Question, label: str, keyw
     # Themes should be unique up to question and label (and keywords)
     # TODO - how can we enforce this?
     # TODO - This isn't working
-    try:
-        theme = models.Theme.objects.get(answer__question=question, keywords=keywords, label=label)
-    except models.Theme.DoesNotExist:
-        theme = models.Theme(keywords=keywords, label=label)
-        theme.save()
+
+    theme, _ = models.Theme.objects.get_or_create(answer__question=question, keywords=keywords, label=label)
+    print(f"created: {_}")
     return theme
 
 
 # TODO - sort out mypy error
 def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
     # Row of answer_df with free_text answers and topic classification
+    print(f"answer_row.id: {answer_row.id}")
+    print(f"answer_row.Name: {answer_row.Name}")
     answer = models.Answer.objects.get(id=answer_row.id)  # type: ignore
     theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)  # type: ignore
     answer.theme = theme
@@ -81,9 +81,9 @@ def save_themes_for_question(question_id: UUID) -> None:
     embeddings = get_embeddings_for_question(free_text_responses)
     topic_model = get_topic_model(free_text_responses, embeddings)
     answers_topics_df = get_answers_and_topics(topic_model, answers_qs)
-    print("answers_topics_df")
-    print(answers_topics_df)
-    print("====")
+    # print("answers_topics_df")
+    # print(answers_topics_df)
+    # print("====")
     save_themes_to_answers(answers_topics_df)
 
 
