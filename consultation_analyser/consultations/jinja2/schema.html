@@ -1,6 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1 class="govuk-heading-xl">Data schema</h1>
+  <h1 class="govuk-heading-xl">Consultation data schema v0.1</h1>
+
+  <p class="govuk-body">This page lists the data components required for a consultation to be suitable for processing by the
+  analyser.
+  </p>
+
+  <h2 class="govuk-heading-l">Changelog</h2>
+  <h3 class="govuk-heading-s">28 March 2024</h3>
+  <p class="govuk-body">Initial release</p>
+
+  <h2 class="govuk-heading-l">Components</h2>
+  {% for schema in schemas %}
+    <h2 class="govuk-heading-m">{{ schema.name() }}</h2>
+    <p class="govuk-body">{{ schema.description() }}</p>
+    {% if schema.rows() %}
+      <table style="word-wrap:break-word" class="govuk-table">
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            <th style="width:30%" scope="col" class="govuk-table__header">Field</th>
+            <th style="width:30%" scope="col" class="govuk-table__header">Description</th>
+            <th style="width:40%" scope="col" class="govuk-table__header">Example</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for row in schema.rows() %}
+            <tr class="govuk-table__row">
+              <th scope="row" class="govuk-table__header">{{ row['name'] }}</th>
+              <td class="govuk-table__cell">{{ row['description'] }}</td>
+              <td class="govuk-table__cell"><code>{{ row['example'] }}</code></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <details class="govuk-details">
+        <summary class="govuk-details__summary">
+          <span class="govuk-details__summary-text">
+            Example JSON
+          </span>
+        </summary>
+        <div class="govuk-details__text">
+          <pre><code>{{ schema.example() }}</code></pre>
+        </div>
+      </details>
+    {% endif %}
+  {% endfor %}
 {% endblock %}
 

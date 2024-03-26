@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpRequest
 from . import models
+from . import public_schemas
 
 
 def home(request: HttpRequest):
@@ -10,7 +11,15 @@ def home(request: HttpRequest):
 
 
 def schema(request: HttpRequest):
-    return render(request, "schema.html")
+    schemas = [
+        public_schemas.RenderableSchema(public_schemas.Consultation),
+        public_schemas.RenderableSchema(public_schemas.Section),
+        public_schemas.RenderableSchema(public_schemas.Question),
+        public_schemas.RenderableSchema(public_schemas.Answer),
+        public_schemas.RenderableSchema(public_schemas.ConsultationResponse),
+    ]
+
+    return render(request, "schema.html", {"schemas": schemas})
 
 
 def show_question(request: HttpRequest, consultation_slug: str, section_slug: str, question_slug: str):
