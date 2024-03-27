@@ -5,8 +5,18 @@ CURRENT_GIT_SHA := $(shell git rev-parse HEAD | cut -c 1-8)
 help: ## Show this help
 	@grep -E '^[a-zA-Z\.\-\_]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+## Schema documentation
 consultation_analyser/consultations/public_schema.py: consultation_analyser/public_schema.yaml
-	poetry run datamodel-codegen --input $< --output $@
+	poetry run datamodel-codegen --input $< --output $@ --use-schema-description
+
+consultation_analyser/consultations/public_schema/%_schema.json: consultation_analyser/consultations/public_schema.py
+	poetry run python manage.py generate_json_schemas
+
+consultation_analyser/consultations/public_schema/%_example.json: consultation_analyser/consultations/public_schema/%_schema.json
+	npx generate-json $^ $@ none $(PWD)/json-schema-faker-options.js
+
+.PHONY: update_schema_docs
+update_schema_docs: consultation_analyser/consultations/public_schema/consultation_example.json consultation_analyser/consultations/public_schema/consultation_response_list_example.json
 
 .PHONY: setup_dev_db
 setup_dev_db: ## Set up the development db on a local postgres
