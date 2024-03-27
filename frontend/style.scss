@@ -15,7 +15,7 @@ $iai-colour-pink: #b62777;
 }
 
 
-/** QUESTION OVERVIEW PAGE **/
+/** QUESTION SUMMARY PAGE **/
 
 .govuk-table__cell:has(.iai-bar) {
     padding: 0.25rem 0;
@@ -54,3 +54,25 @@ $iai-colour-pink: #b62777;
 .iai-inline-list__item {
     margin-left: 2rem;
 }
+
+
+/** RESPONSES PAGE **/
+
+.iai-filters {
+    background-color: govuk-colour("light-grey");
+    padding: 1rem;
+  }
+  @media (min-width: 641px) {
+    .iai-filters {
+      max-width: 14rem;
+    }
+  }
+  .iai-filters .govuk-form-group {
+    /*margin-bottom: 1.5rem;*/
+  }
+
+  .iai-table-subhead {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 100;
+  }
