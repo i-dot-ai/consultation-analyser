@@ -61,9 +61,13 @@ class Theme(UUIDPrimaryKeyModel, TimeStampedModel):
     label = models.CharField(max_length=256, blank=True)
     summary = models.TextField(blank=True)
     keywords = models.JSONField(default=list)
+    # Duplicates info in Answer model, but needed for uniqueness constraint.
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
 
-    class Meta(UUIDPrimaryKeyModel.Meta, TimeStampedModel.Meta):
-        pass
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["summary", "label", "keywords", "question"], name="unique_up_to_question"),
+        ]
 
 
 class Answer(UUIDPrimaryKeyModel, TimeStampedModel):
