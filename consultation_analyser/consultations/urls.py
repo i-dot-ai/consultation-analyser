@@ -9,4 +9,5 @@ urlpatterns = [
         views.show_question,
         name="show_question",
     ),
+    path("consultations/<str:consultation_slug>", views.show_consultation, name="show_consultation"),
 ]

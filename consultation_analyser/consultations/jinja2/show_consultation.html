@@ -3,29 +3,25 @@
 
 {% block content %}
 
-  <h1 class="govuk-heading-xl">Consultations</h1>
-    {% for c in consultations %}
-      <li>
-        <a class="govuk-link" href="{{ url('show_consultation', kwargs={'consultation_slug': c.slug}) }}">{{ c.name }}</a>
-      </li>
-    {% endfor %}
+  <h1 class="govuk-heading-xl">Consultation summary - dummy: {{ consultation.name }}</h1>
 
+  <h2 class="govuk-heading-l">Corresponding questions</h2>
 
-  <h1 class="govuk-heading-xl">Top 10 questions</h1>
+  <div>
     {% for q in questions %}
       <li>
         <a class="govuk-link" href="{{ url('show_question', kwargs={'question_slug': q.slug, 'section_slug': q.section.slug, 'consultation_slug': q.section.consultation.slug}) }}">
                       {{ q.text }}
         </a>
       </li>
-
     {% endfor %}
-
-
-  <form method="post" novalidate>{{csrf_input}}
-    {{ govukButton({
-      'text': "Generate dummy consultation"
-    }) }}
-  </form>
+  </div>
+  <div>
+    <form method="post" novalidate>{{csrf_input}}
+      {{ govukButton({
+        'text': "Generate dummy themes"
+      }) }}
+    </form>
+  </div>
 
 {% endblock %}
