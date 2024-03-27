@@ -1,4 +1,56 @@
 $govuk-assets-path: "govuk-assets/";
 $govuk-font-family: sans-serif;
 
+$iai-colour-pink: #b62777;
+
 @import "node_modules/govuk-frontend/dist/govuk/all";
+
+
+.govuk-header__container {
+    border-color: $iai-colour-pink;
+}
+.govuk-phase-banner__content__tag {
+    background-color: $iai-colour-pink;
+    color: white;
+}
+
+
+/** QUESTION OVERVIEW PAGE **/
+
+.govuk-table__cell:has(.iai-bar) {
+    padding: 0.25rem 0;
+    vertical-align: middle;
+}
+.iai-bar {
+    align-items: center;
+    display: flex;
+    height: 46px;
+    position: relative;
+    vertical-align: middle;
+}
+.iai-bar__value {
+    padding: 0 0.25rem;
+    position: relative;
+    z-index: 10;
+}
+.iai-bar__bar {
+    background-color: govuk-colour("light-blue");
+    display: block;
+    height: 100%;
+    left: 0;
+    opacity: 0.3;
+    position: absolute;
+    top: 0;
+}
+.iai-bar__bar.animate {
+    transition: width 1s;
+}
+
+.iai-inline-list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+}
+.iai-inline-list__item {
+    margin-left: 2rem;
+}

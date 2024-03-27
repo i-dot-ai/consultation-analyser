@@ -1,9 +1,43 @@
 {% extends "base.html" %}
 
+{% set page_title = "Question summary - dummy page" %}
+
 {% block content %}
 
-  <h1 class="govuk-heading-xl">Question summary - dummy page</h1>
-  <p class="govuk-body">{{ question.text }}</p>
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <span class="govuk-caption-m">Showing <strong>all</strong> of <strong>{{ total_responses}} </strong> responses</span>
+      <h1 class="govuk-heading-l">{{ page_title }}</h1>
+      <p class="govuk-body">{{ question.text }}</p>
+
+      {% if multiple_choice and total_responses %}
+        <dl class="govuk-summary-list">
+          {% for item in multiple_choice %}
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key">
+                {{ item.label }}
+              </dt>
+              <dd class="govuk-summary-list__value">
+                {{ ((item.count / total_responses) * 100)|round|int }}%
+              </dd>
+            </div>
+          {% endfor %}
+        </dl>
+      {% endif %}
+    </div>
+
+    {% if multiple_choice and total_responses %}
+      <div class="govuk-grid-column-one-third govuk-!-padding-0">
+        <donut-chart>
+          {% for item in multiple_choice %}
+            <chart-item data-label="{{ item.label }}" data-count="{{ ((item.count / total_responses) * 100)|round|int }}"></chart-item>
+          {% endfor %}
+        </donut-chart>
+      </div>
+    {% endif %}
+
+  </div>
+
 
   <table class="govuk-table">
     <caption class="govuk-table__caption govuk-table__caption--s">
@@ -25,21 +59,31 @@
               </summary>
               <div class="govuk-details__text">
                 <p>{{ theme.summary }}</p>
-                <p>This theme has the following keywords:</p>
-
-                <ul class="iai-inline-list">
+                <p class="govuk-!-margin-bottom-0">This theme has the following keywords:</p>
+                <ul class="iai-inline-list govuk-!-margin-top-1">
                   {% for word in theme.keywords %}
-                    <li>{{ word }}</li>
+                    <li class="iai-inline-list__item">{{ word }}</li>
                   {% endfor %}
                 </ul>
               </div>
             </details>
           </td>
           <td class="govuk-table__cell">
+            <bar-animation class="iai-bar">
+              <span class="iai-bar__value">{{ theme.answer_count }}</span>
+              {% if theme.answer_count and highest_theme_count %}
+                <span class="iai-bar__bar js-bar" style="width: {{ (theme.answer_count / highest_theme_count) * 100 }}%;"></span>
+              {% endif %}
+            </bar-animation>
           </td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  {% compress js %}
+    <script src="{{ static('/scripts/summary-page.js') }}"></script>
+  {% endcompress %}
 
 {% endblock %}
