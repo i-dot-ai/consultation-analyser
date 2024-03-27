@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpRequest
 from . import models
 from . import public_schemas
+from .decorators.renderable_schema import RenderableSchema
 
 
 def home(request: HttpRequest):
@@ -12,11 +13,11 @@ def home(request: HttpRequest):
 
 def schema(request: HttpRequest):
     schemas = [
-        public_schemas.RenderableSchema(public_schemas.Consultation),
-        public_schemas.RenderableSchema(public_schemas.Section),
-        public_schemas.RenderableSchema(public_schemas.Question),
-        public_schemas.RenderableSchema(public_schemas.Answer),
-        public_schemas.RenderableSchema(public_schemas.ConsultationResponse),
+        RenderableSchema(public_schemas.Consultation),
+        RenderableSchema(public_schemas.Section),
+        RenderableSchema(public_schemas.Question),
+        RenderableSchema(public_schemas.Answer),
+        RenderableSchema(public_schemas.ConsultationResponse),
     ]
 
     return render(request, "schema.html", {"schemas": schemas})

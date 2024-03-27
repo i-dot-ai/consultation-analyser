@@ -18,6 +18,10 @@ components:
           type: string
           description: The name of the consultation
           example: 'Consultation on Kit Kats'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Section'
     Section:
       type: object
       description: Each Section contains one or more Questions
@@ -26,10 +30,17 @@ components:
           type: string
           description: The name of the section
           example: 'When to enforce a Kit Kat ban'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
     Question:
       type: object
       description: Each Question will have one or more Answers
       properties:
+        id:
+          type: string
+          format: uuid
         text:
           type: string
           description: The question text
@@ -67,4 +78,8 @@ components:
     ConsultationResponse:
       type: object
       description: Placeholder for response-level information such as demographics, responding-in-the-capacity-of, etc.
-      
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
