@@ -1,11 +1,8 @@
 import pytest
 import pandas as pd
 
-from consultation_analyser.consultations.ml_pipeline import (
-    get_or_create_theme_for_question,
-    save_themes_for_question,
-)
 from consultation_analyser.consultations import models
+
 from tests import factories
 
 
@@ -16,23 +13,24 @@ def test_get_or_create_theme_for_question():
     keywords = ["key", "lock"]
     label = "0_key_lock"
     # Check theme created
-    theme = get_or_create_theme_for_question(question, keywords=keywords, label=label)
+    theme, created = models.Theme.objects.get_or_create(question=question, keywords=keywords, label=label)
     themes_qs = models.Theme.objects.filter(keywords=keywords, label=label)
     assert themes_qs.count() == 1
     assert theme.keywords == keywords
     assert theme.label == label
+    assert created
     # Check no duplicate created
-    get_or_create_theme_for_question(question, keywords=keywords, label=label)
+    theme, created = models.Theme.objects.get_or_create(question=question, keywords=keywords, label=label)
     themes_qs = models.Theme.objects.filter(keywords=keywords, label=label)
     assert themes_qs.count() == 1
 
 
 @pytest.mark.django_db
-def test_save_themes_for_question():
+def test_save_themes_to_answers():
     question = factories.QuestionFactory()
-    answer1 = factories.AnswerFactory(question=question)
-    answer2 = factories.AnswerFactory(question=question)
-    answer3 = factories.AnswerFactory(question=question)
+    answer1 = factories.AnswerFactory(question=question, theme=None)
+    answer2 = factories.AnswerFactory(question=question, theme=None)
+    answer3 = factories.AnswerFactory(question=question, theme=None)
     df = pd.DataFrame(
         {
             "id": [answer1.id, answer2.id, answer3.id],
@@ -41,8 +39,6 @@ def test_save_themes_for_question():
             "Representation": [["x", "y"], ["m", "n"], ["m", "n"]],
         }
     )
-    print(df)
-    save_themes_for_question(df)
     assert answer1.theme.label == "-1_x_y"
     assert answer2.theme.keywords == ["m", "n"]
     themes_for_question = models.Theme.objects.filter(answer__question=question)

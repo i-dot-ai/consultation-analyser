@@ -8,21 +8,24 @@ from bertopic import BERTopic
 from bertopic.vectorizers import ClassTfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
-from django.db.models import QuerySet
 import pandas as pd
 
 from consultation_analyser.consultations import models
 
 
-def get_embeddings_for_question(
-    free_text_responses: List, embedding_model_name: str = "thenlper/gte-small"
-) -> np.ndarray:
+def get_embeddings_for_question(answers_list: List, embedding_model_name: str = "thenlper/gte-small") -> List:
+    free_text_responses = [answer["free_text"] for answer in answers_list]
     embedding_model = SentenceTransformer(embedding_model_name)
     embeddings = embedding_model.encode(free_text_responses)
-    return embeddings
+    z = zip(answers_list, embeddings)
+    answers_list_with_embeddings = [dict(list(d.items()) + [("embedding", embedding)]) for d, embedding in z]
+    return answers_list_with_embeddings
 
 
-def get_topic_model(free_text_responses_list: List, embeddings: np.ndarray) -> BERTopic:
+def get_topic_model(answers_list_with_embeddings: List) -> BERTopic:
+    free_text_responses_list = [answer["free_text"] for answer in answers_list_with_embeddings]
+    embeddings = [answer["embedding"] for answer in answers_list_with_embeddings]
+    embeddings = np.array(embeddings)
     umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0, metric="cosine", random_state=12)
     hdbscan_model = HDBSCAN(
         min_cluster_size=3, metric="euclidean", cluster_selection_method="eom", prediction_data=True
@@ -36,10 +39,10 @@ def get_topic_model(free_text_responses_list: List, embeddings: np.ndarray) -> B
     return topic_model
 
 
-def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> pd.DataFrame:
-    # Answers/IDs need to be in the same order - answers_qs has been sorted
-    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
-    answers_id_list = answers_qs.values_list("id", flat=True)
+def get_answers_and_topics(topic_model: BERTopic, answers_list: List) -> pd.DataFrame:
+    # Answers free text/IDs need to be in the same order
+    free_text_responses = [answer["free_text"] for answer in answers_list]
+    answers_id_list = [answer["id"] for answer in answers_list]
     # Assign topics to answers
     answers_df = topic_model.get_document_info(free_text_responses)
     answers_df["id"] = answers_id_list
@@ -47,50 +50,39 @@ def get_answers_and_topics(topic_model: BERTopic, answers_qs: QuerySet) -> pd.Da
     return answers_df
 
 
-def get_or_create_theme_for_question(question: models.Question, label: str, keywords: str) -> models.Theme:
-    # Themes should be unique up to question and label (and keywords)
-    # TODO - how can we enforce this?
-    # TODO - This isn't working
-
-    theme, _ = models.Theme.objects.get_or_create(answer__question=question, keywords=keywords, label=label)
-    print(f"created: {_}")
-    return theme
-
-
 # TODO - sort out mypy error
-def save_answer_theme(answer_row: NamedTuple) -> models.Answer:
+def save_theme_to_answer(question: models.Question, answer_row: NamedTuple) -> models.Answer:
     # Row of answer_df with free_text answers and topic classification
-    print(f"answer_row.id: {answer_row.id}")
-    print(f"answer_row.Name: {answer_row.Name}")
     answer = models.Answer.objects.get(id=answer_row.id)  # type: ignore
-    theme = get_or_create_theme_for_question(answer.question, label=answer_row.Name, keywords=answer_row.Representation)  # type: ignore
+    theme, _ = models.Theme.objects.get_or_create(
+        question=question, label=answer_row.Name, keywords=answer_row.Representation
+    )  # type: ignore
+    print(f"theme: {theme}, created: {_}")
     answer.theme = theme
     answer.save()
     return answer
 
 
-def save_themes_to_answers(answers_topics_df: pd.DataFrame) -> None:
+def save_themes_to_answers(question: models.Question, answers_topics_df: pd.DataFrame) -> None:
+    print(f"answers_topics_df: {answers_topics_df}")
     for row in answers_topics_df.itertuples():
-        save_answer_theme(row)
+        save_theme_to_answer(question, row)
 
 
-def save_themes_for_question(question_id: UUID) -> None:
+def save_themes_for_question(question: models.Question) -> None:
     # Need to fix order
-    answers_qs = models.Answer.objects.filter(question__id=question_id).order_by("created_at")
-    free_text_responses = list(answers_qs.values_list("free_text", flat=True))
-    embeddings = get_embeddings_for_question(free_text_responses)
-    topic_model = get_topic_model(free_text_responses, embeddings)
-    answers_topics_df = get_answers_and_topics(topic_model, answers_qs)
-    # print("answers_topics_df")
-    # print(answers_topics_df)
-    # print("====")
-    save_themes_to_answers(answers_topics_df)
+    answers_qs = models.Answer.objects.filter(question=question).order_by("created_at")
+    answers_list = list(answers_qs.values("id", "free_text"))
+    answers_list_with_embeddings = get_embeddings_for_question(answers_list)
+    topic_model = get_topic_model(answers_list_with_embeddings)
+    answers_topics_df = get_answers_and_topics(topic_model, answers_list_with_embeddings)
+    save_themes_to_answers(question, answers_topics_df)
 
 
 def save_themes_for_consultation(consultation_id: UUID) -> None:
     questions = models.Question.objects.filter(section__consultation__id=consultation_id, has_free_text=True)
     for question in questions:
-        save_themes_for_question(question.id)
+        save_themes_for_question(question)
 
 
 # TODO - what to do with topic -1 (outliers)
