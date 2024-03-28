@@ -1,3 +1,8 @@
+variable "account_id" {
+  type        = string
+  description = "AWS Account ID"
+}
+
 variable "app-replica-count-desired" {
   type        = number
   default     = 1

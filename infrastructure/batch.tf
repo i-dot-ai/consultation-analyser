@@ -5,6 +5,7 @@ locals {
 
 module "batch_compute" {
   source          = "../../i-ai-core-infrastructure/modules/batch/batch_compute_environment"
+  account_id      = var.account_id
   project         = "i-dot-ai"
   name            = "consultations"
   region          = var.region
@@ -19,6 +20,7 @@ module "batch_compute" {
 
 module "batch_job_definition" {
   source                  = "../../i-ai-core-infrastructure/modules/batch/batch_job_definitons"
+  account_id              = var.account_id
   project                 = "i-dot-ai"
   name                    = "consultations"
   region                  = var.region

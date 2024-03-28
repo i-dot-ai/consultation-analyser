@@ -10,7 +10,7 @@ module "postgres" {
   instance_type           = "db.t3.large"
   developer_ips           = var.developer_ips
   db_name                 = var.project_name
-  kms_secrets_arn         = data.terraform_remote_state.platform.outputs.kms_secrets_arn
+  kms_secrets_arn         = data.terraform_remote_state.platform.outputs.kms_key_arn
   project                 = "i-dot-ai"
   domain_name             = var.domain_name
   state_bucket            = var.state_bucket
