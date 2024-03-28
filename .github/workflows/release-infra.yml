@@ -1,0 +1,98 @@
+name: release-infrastructure
+
+on:
+  push:
+    tags:
+      - release-dev-**
+      - release-preprod-**
+
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  set-vars:
+    runs-on: ubuntu-latest
+    outputs:
+      app-name: ${{ steps.export.outputs.app-name }}
+      ec2-instance-type: ${{ steps.export.outputs.ec2-instance-type }}
+      version: ${{ steps.export.outputs.version }}
+      repo: ${{ steps.export.outputs.repo }}
+      infra_config_repo: ${{ steps.export.outputs.infra-config-repo }}
+      environment: ${{ steps.export.outputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: export
+        run: |
+          . ./.github/.github.env
+          echo "ec2-instance-type=${EC2_INSTANCE_TYPE}" >> $GITHUB_OUTPUT
+          echo "app-name=${APP_NAME}" >> $GITHUB_OUTPUT
+          echo "aws-region=${AWS_REGION}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "data-path=${DATA_PATH}" >> $GITHUB_OUTPUT
+          echo "repo=${REPO}" >> $GITHUB_OUTPUT
+          echo "infra-config-repo=${INFRA_CONFIG_REPO}" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+          echo "::add-mask::${AWS_REGION}"
+
+      - id: env-var
+        run: |
+          # prod env from main branch
+          if [ ${{ github.ref == 'refs/heads/main' }} ]; then
+            export ENVIRONMENT=prod
+          # Otherwise get the environment from the tag
+          else
+            export ENVIRONMENT=$(echo ${{ github.ref_name }} | awk -F- '{ print $2 }')
+          fi
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+
+
+  start-runner:
+        uses: i-dot-ai/i-dot-ai-core-github-actions/.github/workflows/start-runner.yml@main
+        needs: set-vars
+        with:
+            EC2_INSTANCE_TYPE: ${{ needs.set-vars.outputs.ec2-instance-type }}
+            ENVIRONMENT: ${{ needs.set-vars.outputs.environment }}
+        secrets:
+            AWS_GITHUBRUNNER_USER_ACCESS_KEY: ${{ secrets.AWS_GITHUBRUNNER_USER_ACCESS_KEY }}
+            AWS_GITHUBRUNNER_USER_SECRET_ID: ${{ secrets.AWS_GITHUBRUNNER_USER_SECRET_ID }}
+            AWS_GITHUBRUNNER_PAT: ${{ secrets.AWS_GITHUBRUNNER_PAT}}
+            AWS_REGION: ${{ secrets.AWS_REGION }}
+
+
+  build-infra:
+    needs:
+      - set-vars
+      - start-runner
+    uses: i-dot-ai/i-dot-ai-core-github-actions/.github/workflows/apply-terraform.yml@main
+    with:
+      APP_NAME: ${{ needs.set-vars.outputs.app-name }}
+      RUNNER_LABEL: ${{ needs.start-runner.outputs.label }}
+      ENVIRONMENT: ${{ needs.set-vars.outputs.environment }}
+      PUBLIC_INFRA_DEPLOYMENT: true
+      INFRA_CONFIG_REPO: ${{ needs.set-vars.outputs.infra_config_repo }}
+    secrets:
+      AWS_GITHUBRUNNER_PAT: ${{ secrets.AWS_GITHUBRUNNER_PAT }}
+      AWS_GITHUBRUNNER_PAT_USER: ${{ secrets.AWS_GITHUBRUNNER_PAT_USER }} 
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+  stop-runner:
+    needs:
+      - set-vars
+      - start-runner
+      - build-infra
+    uses: i-dot-ai/i-dot-ai-core-github-actions/.github/workflows/stop-runner.yml@main
+    if: needs.start-runner.outputs.use-persisted == 0 && always() 
+    with:
+      RUNNER_LABEL: ${{ needs.start-runner.outputs.label }}
+      EC2_INSTANCE_ID: ${{ needs.start-runner.outputs.ec2-instance-id }}
+    secrets:
+      AWS_GITHUBRUNNER_USER_ACCESS_KEY: ${{ secrets.AWS_GITHUBRUNNER_USER_ACCESS_KEY }}
+      AWS_GITHUBRUNNER_USER_SECRET_ID: ${{ secrets.AWS_GITHUBRUNNER_USER_SECRET_ID }}
+      AWS_GITHUBRUNNER_PAT: ${{ secrets.AWS_GITHUBRUNNER_PAT }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}

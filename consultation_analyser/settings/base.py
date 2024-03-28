@@ -26,7 +26,7 @@ env = environ.Env(DEBUG=(bool, False))
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS: list[str] = ["0.0.0.0"]  # nosec
+ALLOWED_HOSTS: list[str] = [os.getenv("DOMAIN_NAME", "0.0.0.0"), "*"]  # nosec
 
 # Application definition
 
@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     "consultation_analyser.consultations",
     "compressor",
 ]
+
+
+# TODO: steal code from this blog post to add a health check endpoint: https://testdriven.io/blog/deploying-django-to-ecs-with-terraform/#django-health-check
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -70,7 +73,21 @@ WSGI_APPLICATION = "consultation_analyser.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {"default": env.db()}
+PRODUCTION_DEPLOYMENT = os.environ.get("PRODUCTION_DEPLOYMENT", False)
+
+if PRODUCTION_DEPLOYMENT:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": 5432,
+        }
+    }
+else:
+    DATABASES = {"default": env.db()}
 
 
 # Password validation
@@ -111,8 +128,13 @@ COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 
 STATIC_URL = "static/"
 STATIC_ROOT = "frontend/"
-STATICFILES_DIRS = [("govuk-assets", BASE_DIR / "node_modules/govuk-frontend/dist/govuk/assets")]
-STATICFILES_FINDERS = ["compressor.finders.CompressorFinder", "django.contrib.staticfiles.finders.FileSystemFinder"]
+STATICFILES_DIRS = [
+    ("govuk-assets", BASE_DIR / "node_modules/govuk-frontend/dist/govuk/assets")
+]
+STATICFILES_FINDERS = [
+    "compressor.finders.CompressorFinder",
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
