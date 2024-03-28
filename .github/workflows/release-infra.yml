@@ -1,4 +1,4 @@
-name: build-infrastructure
+name: release-infrastructure
 
 on:
   push:
@@ -6,8 +6,10 @@ on:
       - release-dev-**
       - release-preprod-**
 
-    branches:
-      - main
+  workflow_run:
+    workflows: [build]
+    types: [completed]
+    branches: [main]
 
 jobs:
   set-vars:
