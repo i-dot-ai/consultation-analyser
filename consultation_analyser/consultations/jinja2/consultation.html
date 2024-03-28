@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+
+{% set page_title = "Consultation" %}
+
+{% block content %}
+  <h1 class="govuk-heading-l">{{ page_title }}</h1>
+
+  <h2 class="govuk-heading-m govuk-!-margin-bottom-0">Questions</h2>
+  <ul class="iai-questions govuk-body govuk-!-padding-0">
+    {% for q in questions %}
+      <li class="iai-questions__item govuk-!-margin-top-3">
+        <p class="govuk-!-margin-bottom-1 govuk-!-margin-top-0">{{ q.text }}</p>
+        <span class="iai-questions__links govuk-body-s govuk-!-margin-bottom-1 govuk-!-margin-top-2">
+          <a href="{{ url('show_question', kwargs={'question_slug': q.slug, 'section_slug': q.section.slug, 'consultation_slug': q.section.consultation.slug}) }}" class="govuk-link govuk-link--no-visited-state">
+            Question summary
+            <span class="govuk-visually-hidden"> - {{ q.text }}</span>
+          </a>
+          {# TO DO: put the following href in the same format as above (once the question-detail PR has been merged) #}
+          <a href="/consultations/{{ q.section.consultation.slug }}/sections/{{ q.section.slug }}/question-detail/{{ q.slug }}" class="govuk-link govuk-link--no-visited-state">
+            Explore responses
+            <span class="govuk-visually-hidden"> - {{ q.text }}</span>
+          </a>
+        </span>
+      </li>
+    {% endfor %}
+  </ul>
+
+{% endblock %}

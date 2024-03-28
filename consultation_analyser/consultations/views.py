@@ -9,6 +9,12 @@ def home(request: HttpRequest):
     return render(request, "home.html", context)
 
 
+def consultation(request: HttpRequest):
+    questions = models.Question.objects.all().order_by("id")[:10]
+    context = {"questions": questions}
+    return render(request, "consultation.html", context)
+
+
 def show_question(request: HttpRequest, consultation_slug: str, section_slug: str, question_slug: str):
     question = models.Question.objects.get(
         slug=question_slug, section__slug=section_slug, section__consultation__slug=consultation_slug
