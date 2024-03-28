@@ -35,6 +35,7 @@ django-extensions = "^3.2.3"
 files = '**/*.py'
 exclude= ['^consultation_analyser/consultations/migrations/']
 
+
 [tool.poetry.group.test.dependencies]
 pytest-django = "^4.8.0"
 django-webtest = "^1.9.11"
