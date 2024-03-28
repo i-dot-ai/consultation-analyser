@@ -38,7 +38,6 @@ module "ecs" {
   aws_lb_arn                   = data.terraform_remote_state.platform.outputs.load_balancer_arn["default"]
   host                         = local.host
   route53_record_name          = aws_route53_record.type_a_record.name
-  # enable_execute_command       = true
 
   authenticate_cognito = {
     enabled : true,

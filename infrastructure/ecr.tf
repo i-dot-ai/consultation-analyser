@@ -2,7 +2,7 @@ module "ecr" {
   source                = "../../i-ai-core-infrastructure//modules/ecr"
   project_name          = var.project_name
   container_name_suffix = null
-  count                 = data.aws_ecr_repository.existing[0].repository_url != null ? 0 : 1
+  # count                 = data.aws_ecr_repository.existing[0].repository_url != null ? 0 : 1
 }
 
 locals {
