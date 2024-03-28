@@ -17,4 +17,5 @@ module "postgres" {
   task_prefix             = var.project_name
   service_sg_ids          = [module.ecs.ecs_sg_id]
   dev_instance            = local.dev_flag
+  prod_maintenance        = true
 }
