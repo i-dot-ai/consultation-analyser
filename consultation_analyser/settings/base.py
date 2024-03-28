@@ -26,11 +26,7 @@ env = environ.Env(DEBUG=(bool, False))
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS: list[str] = [
-    os.getenv("DOMAIN_NAME", "0.0.0.0"),
-    "0.0.0.0",
-    "ELB-HealthChecker/2.0",
-]  # nosec
+ALLOWED_HOSTS: list[str] = [os.getenv("DOMAIN_NAME", "0.0.0.0"), "*"]  # nosec
 
 # Application definition
 
@@ -43,6 +39,9 @@ INSTALLED_APPS = [
     "consultation_analyser.consultations",
     "compressor",
 ]
+
+
+# TODO: steal code from this blog post to add a health check endpoint: https://testdriven.io/blog/deploying-django-to-ecs-with-terraform/#django-health-check
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
