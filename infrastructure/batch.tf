@@ -1,4 +1,7 @@
 
+locals {
+  batch_image_ecr_url = data.aws_ecr_repository.existing[0].repository_url != null ? data.aws_ecr_repository.existing[0].repository_url : module.ecr.ecr_repository_url
+}
 
 module "batch_compute" {
   source          = "../../i-ai-core-infrastructure/modules/batch/batch_compute_environment"
@@ -21,6 +24,6 @@ module "batch_job_definition" {
   region                  = var.region
   compute_environment_arn = [module.batch_compute.ec2_compute_environment_arn]
   state_bucket            = var.state_bucket
-  image                   = "${module.ecr.ecr_repository_url}:${var.image_tag}"
+  image                   = "${local.batch_image_ecr_url}:${var.image_tag}"
   fargate_flag            = false
 }

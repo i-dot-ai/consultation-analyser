@@ -7,7 +7,11 @@ resource "aws_secretsmanager_secret" "django_secret" {
   }
 }
 
+data "aws_secretsmanager_secret" "django_secret" {
+  arn = aws_secretsmanager_secret.django_secret.arn
+}
+
+
 data "aws_secretsmanager_secret_version" "django_secret" {
-  secret_id  = aws_secretsmanager_secret.django_secret.id
-  depends_on = [aws_secretsmanager_secret.django_secret]
+  secret_id = data.aws_secretsmanager_secret.django_secret.id
 }
