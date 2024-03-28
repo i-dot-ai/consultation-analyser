@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
+
+{% set page_title = "Responses - dummy page" %}
+
+
+{% block content %}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <h1 class="govuk-heading-l">{{ page_title }}</h1>
+      <p class="govuk-body">{{ question.text }}</p>
+    </div>
+  </div>
+
+  <div class="govuk-grid-row govuk-!-margin-top-5">
+
+    <div class="govuk-grid-column-one-third">
+      <div class="iai-filters govuk-!-margin-bottom-5">
+        <h2 class="govuk-heading-m">Filters</h2>
+        <form>
+
+          <div class="govuk-form-group">
+            <label class="govuk-label" for="event-name">Keyword search</label>
+            <input class="govuk-input govuk-input--width-10" id="keyword" name="keyword" type="text" value="{{applied_filters.keyword}}">
+          </div>
+
+          <div class="govuk-form-group">
+              <label class="govuk-label" for="theme">
+                Theme
+              </label>
+              <select class="govuk-select" id="theme" name="theme">
+                <option {% if applied_filters.theme == "All" %}selected{% endif %}>All</option>
+                {% for theme in themes_for_question %}
+                  <option value="{{ theme.id }}" {% if applied_filters.theme|string == theme.id|string %}selected{% endif %}>{{ theme.label }}</option>
+                {% endfor %}
+                <option {% if applied_filters.theme == "No theme" %}selected{% endif %}>No theme</option>
+              </select>
+            </div>
+
+          {% if question.multiple_choice_options %}
+            <div class="govuk-form-group">
+              <label class="govuk-label" for="opinion">
+                Opinion
+              </label>
+              <select class="govuk-select" id="opinion" name="opinion">
+                <option {% if applied_filters.opinion == "All" %}selected{% endif %}>All</option>
+                {% for option in question.multiple_choice_options %}
+                  <option {% if applied_filters.opinion == option %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+
+          {{ govukButton({
+            "text": "Apply filters",
+            "classes": "govuk-!-margin-bottom-2"
+          }) }}
+          <div class="govuk-!-padding-2">
+            <a class="govuk-body" href="?">Clear filters</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="govuk-grid-column-two-thirds">
+
+      <table class="govuk-table">
+        <caption class="govuk-table__caption govuk-table__caption--m">
+          <h2 class="govuk-heading-m govuk-!-margin-bottom-0">Responses</h2>
+          <span class="iai-table-subhead govuk-!-margin-top-1">(Showing <strong>{{ responses|length }}</strong> of <strong>{{ total_responses }}</strong> responses)</span>
+        </caption>
+        <thead class="govuk-table__head">
+          <tr class="govuk-table__row">
+            {% if question.multiple_choice_options %}
+              <th scope="col" class="govuk-table__header">Multiple choice</th>
+            {% endif %}
+            <th scope="col" class="govuk-table__header">Free text</th>
+          </tr>
+        </thead>
+        <tbody class="govuk-table__body">
+          {% for response in responses %}
+            <tr class="govuk-table__row govuk-body-s">
+              {% if question.multiple_choice_options %}
+                <td class="govuk-table__cell">
+                  {{ response.multiple_choice_responses }}
+                </td>
+              {% endif %}
+              <td class="govuk-table__cell">
+                {{ response.free_text }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+
+      {# Pagination #}
+      <nav class="govuk-pagination" role="navigation" aria-label="Pagination">
+
+        {% set filters = namespace(str="") %}
+        {% for key, value in applied_filters.items() %}
+          {% set filters.str = filters.str + "&" + key + "=" + value %}
+        {% endfor %}
+
+        {% if pagination.number > 1 %}
+          <div class="govuk-pagination__prev">
+            <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.number - 1 }}{{ filters.str }}" rel="prev">
+              <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                <path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path>
+              </svg>
+              <span class="govuk-pagination__link-title">
+                Previous<span class="govuk-visually-hidden"> page</span>
+              </span>
+            </a>
+          </div>
+        {% endif %}
+
+        <ul class="govuk-pagination__list">
+
+          {% if pagination.number > 2 %}
+            <li class="govuk-pagination__item">
+              <a class="govuk-link govuk-pagination__link" href="?page=1{{ filters.str }}" aria-label="Page 1">
+                1
+              </a>
+            </li>
+            <li class="govuk-pagination__item govuk-pagination__item--ellipses">
+              &ctdot;
+            </li>
+          {% endif %}
+
+          {% if pagination.has_previous() %}
+            <li class="govuk-pagination__item">
+              <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.previous_page_number() }}{{ filters.str }}" aria-label="Page {{ pagination.previous_page_number() }}">
+                {{ pagination.previous_page_number() }}
+              </a>
+            </li>
+          {% endif %}
+          <li class="govuk-pagination__item govuk-pagination__item--current">
+            <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.number }}{{ filters.str }}" aria-label="Page {{ pagination.number }}" aria-current="page">
+              {{ pagination.number }}
+            </a>
+          </li>
+
+          {% if pagination.has_next() %}
+            <li class="govuk-pagination__item">
+              <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.next_page_number() }}{{ filters.str }}" aria-label="Page {{ pagination.next_page_number() }}">
+                {{ pagination.next_page_number() }}
+              </a>
+            </li>
+          {% endif %}
+
+          {% if pagination.paginator.num_pages > pagination.number + 1 %}
+            <li class="govuk-pagination__item govuk-pagination__item--ellipses">
+              &ctdot;
+            </li>
+            <li class="govuk-pagination__item">
+              <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.paginator.num_pages }}{{ filters.str }}" aria-label="Page {{ pagination.paginator.num_pages }}">
+                {{ pagination.paginator.num_pages }}
+              </a>
+            </li>
+          {% endif %}
+
+        </ul>
+
+        {% if pagination.has_next() %}
+          <div class="govuk-pagination__next">
+            <a class="govuk-link govuk-pagination__link" href="?page={{ pagination.next_page_number() }}{{ filters.str }}" rel="next">
+              <span class="govuk-pagination__link-title">
+                Next<span class="govuk-visually-hidden"> page</span>
+              </span>
+              <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13">
+                <path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path>
+              </svg>
+            </a>
+          </div>
+        {% endif %}
+
+      </nav>
+
+
+    </div>
+
+  </div>
+
+{% endblock %}

@@ -7,6 +7,8 @@ import faker as _faker
 
 faker = _faker.Faker()
 
+default_multiple_choice_options = ["Yes", "No", "Not sure"]
+
 
 class FakeConsultationData:
     def __init__(self):
@@ -42,7 +44,11 @@ class ConsultationFactory(factory.django.DjangoModelFactory):
     def with_question(consultation, creation_strategy, value, **kwargs):
         if value is True:
             SectionFactory(
-                consultation=consultation, with_question=True, with_question__with_answer=kwargs.get("with_answer")
+                consultation=consultation,
+                with_question=True,
+                with_question__with_answer=kwargs.get("with_answer"),
+                with_question__with_multiple_choice=kwargs.get("with_multiple_choice"),
+                with_question__with_free_text=kwargs.get("with_free_text"),
             )
 
 
@@ -61,13 +67,18 @@ class SectionFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def with_question(section, creation_strategy, value, **kwargs):
         if value is True:
-            QuestionFactory(section=section, with_answer=kwargs.get("with_answer"))
+            QuestionFactory(
+                section=section,
+                with_answer=kwargs.get("with_answer"),
+                with_multiple_choice=kwargs.get("with_multiple_choice"),
+                with_free_text=kwargs.get("with_free_text"),
+            )
 
 
 class QuestionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Question
-        skip_postgeneration_save = True
+        skip_postgeneration_save = False
 
     text = factory.LazyAttribute(lambda o: o.question["text"])
     slug = factory.LazyAttribute(lambda o: o.question["slug"])
@@ -81,7 +92,21 @@ class QuestionFactory(factory.django.DjangoModelFactory):
     @factory.post_generation
     def with_answer(question, creation_strategy, value, **kwargs):
         if value is True:
-            AnswerFactory(question=question)
+            AnswerFactory(question=question, with_multiple_choice=kwargs.get("with_multiple_choice"))
+
+    @factory.post_generation
+    def with_multiple_choice(question, creation_strategy, value, **kwargs):
+        if value is True and question.multiple_choice_options is None:
+            question.multiple_choice_options = default_multiple_choice_options
+
+    @factory.post_generation
+    def with_free_text(question, creation_strategy, value, **kwargs):
+        if value is True:
+            AnswerFactory(
+                question=question,
+                with_multiple_choice=kwargs.get("with_multiple_choice"),
+                with_free_text=kwargs.get("with_free_text"),
+            )
 
 
 class ConsultationResponseFactory(factory.django.DjangoModelFactory):
@@ -118,3 +143,13 @@ class AnswerFactory(factory.django.DjangoModelFactory):
     question = factory.SubFactory(QuestionFactory)
     consultation_response = factory.SubFactory(ConsultationResponseFactory)
     theme = factory.SubFactory(ThemeFactory)
+
+    @factory.post_generation
+    def with_multiple_choice(answer, creation_strategy, value, **kwargs):
+        if answer.multiple_choice_responses is None:
+            answer.multiple_choice_responses = random.choice(default_multiple_choice_options)
+
+    @factory.post_generation
+    def with_free_text(answer, creation_strategy, value, **kwargs):
+        if answer.free_text is None:
+            answer.free_text = "This is a sample free-text response"
