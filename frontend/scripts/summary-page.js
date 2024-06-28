@@ -2,7 +2,7 @@
 
 
 // donut chart
-class donutChart extends HTMLElement {
+class DonutChart extends HTMLElement {
     connectedCallback() {
 
         // pull in data
@@ -21,8 +21,10 @@ class donutChart extends HTMLElement {
          * @param {boolean} firstTime
          */
         const sizeChart = (firstTime) => {
+            this.style.display = 'none';
             this.style.width = `${this.parentElement?.scrollWidth}px`;
             this.style.height = `${this.parentElement?.scrollWidth}px`;
+            this.style.display = 'block';
             if (!firstTime) {
                 const box = this.getBoundingClientRect();
                 chart.resize({
@@ -67,11 +69,12 @@ class donutChart extends HTMLElement {
                     label: {
                         align: 'left',
                         color: '#fff',
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: 'bold',
                         formatter: [
-                            '{b}',
-                            '\n{percent|{c}%}'
+                            //'{b}',
+                            //'\n{percent|{c}%}'
+                            '{c}%'
                         ].join('\n'),
                         lineHeight: 14,
                         position: 'inside',
@@ -94,11 +97,11 @@ class donutChart extends HTMLElement {
 
     }
 }
-customElements.define('donut-chart', donutChart);
+customElements.define('donut-chart', DonutChart);
 
 
 
-class barAnimation extends HTMLElement {
+class BarAnimation extends HTMLElement {
     connectedCallback () {
 
         // check user hasn't requested reduced motion
@@ -106,17 +109,17 @@ class barAnimation extends HTMLElement {
             return;
         }
 
-        /** @type {NodeListOf<HTMLElement>} */
-        const bars = this.querySelectorAll('.js-bar');
-        bars.forEach((bar) => {
-            const originalWidth = bar.style.width;
-            bar.style.width = '0%';
-            window.setTimeout(() => {
-                bar.classList.add('animate');
-                bar.style.width = originalWidth;
-            }, 1);
-        });
+        const bar = this.querySelector('span');
+        if (!bar) {
+            return;
+        }
+        const originalWidth = bar.style.width;
+        bar.style.width = '0%';
+        window.setTimeout(() => {
+            bar.classList.add('animate');
+            bar.style.width = originalWidth;
+        }, 1);
 
     }
 }
-customElements.define('bar-animation', barAnimation);
+customElements.define('bar-animation', BarAnimation);

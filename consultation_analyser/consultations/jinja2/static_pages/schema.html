@@ -3,154 +3,156 @@
 {% set page_title = "Data schema" %}
 
 {% block content %}
-<div class="govuk-width-container">
+<div class="govuk-width-container iai-grid">
+  <div class="iai-grid__start-3-span-8">
 
-  <h1 class="govuk-heading-xl">Consultation data schema v0.2</h1>
+    <h1 class="govuk-heading-xl">Consultation data schema v0.2</h1>
 
-  <p class="govuk-body">This page lists the data components required for a consultation to be suitable for processing by Consult. </p>
+    <p class="govuk-body">This page lists the data components required for a consultation to be suitable for processing by Consult. </p>
 
-  <p class="govuk-body">Data should be provided in one JSON file containing both the consultation itself and a list of responses. That overall data file is described here and an example is given. Underneath are details of each section, including individual JSON schemas for both the Consultation and ConsultationResponse parts of the JSON file.</p>
+    <p class="govuk-body">Data should be provided in one JSON file containing both the consultation itself and a list of responses. That overall data file is described here and an example is given. Underneath are details of each section, including individual JSON schemas for both the Consultation and ConsultationResponse parts of the JSON file.</p>
 
-  <h2 class="govuk-heading-l">JSON schemas</h2>
+    <h2 class="govuk-heading-l">JSON schemas</h2>
 
-  <h3 class="govuk-heading-m">ConsultationWithResponses JSON</h3>
-  <p class="govuk-body">This is the schema for the file Consult will accept, so if your JSON is valid according to this schema, is is ready to upload. For advice on how to do this in Python, see <a class="govuk-link" href="https://python-jsonschema.readthedocs.io/en/latest/validate/">the jsonschema documentation</a>. Other languages will have equivalent libraries.</p>
+    <h3 class="govuk-heading-m">ConsultationWithResponses JSON</h3>
+    <p class="govuk-body">This is the schema for the file Consult will accept, so if your JSON is valid according to this schema, is is ready to upload. For advice on how to do this in Python, see <a class="govuk-link" href="https://python-jsonschema.readthedocs.io/en/latest/validate/">the jsonschema documentation</a>. Other languages will have equivalent libraries.</p>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        JSON schema
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-with-responses-schema">
-      <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_with_responses_schema.json">Download the JSON schema</a></p>
-      <pre><code>{{ json_schemas['consultation_with_responses'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          JSON schema
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-with-responses-schema">
+        <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_with_responses_schema.json">Download the JSON schema</a></p>
+        <pre><code>{{ json_schemas['consultation_with_responses'] }}</code></pre>
+      </div>
+    </details>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Example JSON
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-with-responses-example">
-      <pre><code>{{ json_examples['consultation_with_responses'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          Example JSON
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-with-responses-example">
+        <pre><code>{{ json_examples['consultation_with_responses'] }}</code></pre>
+      </div>
+    </details>
 
-  <h3 class="govuk-heading-m">Consultation JSON</h3>
-  <p class="govuk-body">The schema for the consultation part of the file, provided in case it is easier to work on this part individually.</p>
+    <h3 class="govuk-heading-m">Consultation JSON</h3>
+    <p class="govuk-body">The schema for the consultation part of the file, provided in case it is easier to work on this part individually.</p>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        JSON schema
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-schema">
-      <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_schema.json">Download the JSON schema</a></p>
-      <pre><code>{{ json_schemas['consultation'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          JSON schema
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-schema">
+        <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_schema.json">Download the JSON schema</a></p>
+        <pre><code>{{ json_schemas['consultation'] }}</code></pre>
+      </div>
+    </details>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Example JSON
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-example">
-      <pre><code>{{ json_examples['consultation'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          Example JSON
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-example">
+        <pre><code>{{ json_examples['consultation'] }}</code></pre>
+      </div>
+    </details>
 
-  <h3 class="govuk-heading-m">ConsultationResponse JSON</h3>
-  <p class="govuk-body">The schema for each response part of the file.</p>
+    <h3 class="govuk-heading-m">ConsultationResponse JSON</h3>
+    <p class="govuk-body">The schema for each response part of the file.</p>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        JSON schema
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-response-schema">
-      <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_response_schema.json">Download the JSON schema</a></p>
-      <pre><code>{{ json_schemas['consultation_response'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          JSON schema
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-response-schema">
+        <p class="govuk-body"><a class="govuk-link" download href="/schema/consultation_response_schema.json">Download the JSON schema</a></p>
+        <pre><code>{{ json_schemas['consultation_response'] }}</code></pre>
+      </div>
+    </details>
 
-  <details class="govuk-details">
-    <summary class="govuk-details__summary">
-      <span class="govuk-details__summary-text">
-        Example JSON
-      </span>
-    </summary>
-    <div class="govuk-details__text" data-qa="consultation-response-example">
-      <pre><code>{{ json_examples['consultation_response'] }}</code></pre>
-    </div>
-  </details>
+    <details class="govuk-details">
+      <summary class="govuk-details__summary">
+        <span class="govuk-details__summary-text">
+          Example JSON
+        </span>
+      </summary>
+      <div class="govuk-details__text" data-qa="consultation-response-example">
+        <pre><code>{{ json_examples['consultation_response'] }}</code></pre>
+      </div>
+    </details>
 
 
-  <h2 class="govuk-heading-l">Entities</h2>
-  {% for schema in entity_schemas %}
-    <h3 class="govuk-heading-m">{{ schema.name() }}</h3>
-    <p class="govuk-body">{{ schema.description() }}</p>
-    {% if schema.rows() %}
-      <table style="word-wrap:break-word" class="govuk-table">
-        <thead class="govuk-table__head">
-          <tr class="govuk-table__row">
-            <th style="width:30%" scope="col" class="govuk-table__header">Field</th>
-            <th style="width:30%" scope="col" class="govuk-table__header">Type</th>
-            <th style="width:30%" scope="col" class="govuk-table__header">Description</th>
-          </tr>
-        </thead>
-        <tbody class="govuk-table__body">
-          {% for row in schema.rows() %}
+    <h2 class="govuk-heading-l">Entities</h2>
+    {% for schema in entity_schemas %}
+      <h3 class="govuk-heading-m">{{ schema.name() }}</h3>
+      <p class="govuk-body">{{ schema.description() }}</p>
+      {% if schema.rows() %}
+        <table style="word-wrap:break-word" class="govuk-table">
+          <thead class="govuk-table__head">
             <tr class="govuk-table__row">
-              <th scope="row" class="govuk-table__header">
-                {% if row['name'] != "root" %}
-                  {{ row["name"] }}
-                {% endif %}
-              </th>
-              <td class="govuk-table__cell"><code>{{ row['datatype'] }}</code></td>
-              <td class="govuk-table__cell">{{ row['description'] }}</td>
+              <th style="width:30%" scope="col" class="govuk-table__header">Field</th>
+              <th style="width:30%" scope="col" class="govuk-table__header">Type</th>
+              <th style="width:30%" scope="col" class="govuk-table__header">Description</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% endif %}
-  {% endfor %}
+          </thead>
+          <tbody class="govuk-table__body">
+            {% for row in schema.rows() %}
+              <tr class="govuk-table__row">
+                <th scope="row" class="govuk-table__header">
+                  {% if row['name'] != "root" %}
+                    {{ row["name"] }}
+                  {% endif %}
+                </th>
+                <td class="govuk-table__cell"><code>{{ row['datatype'] }}</code></td>
+                <td class="govuk-table__cell">{{ row['description'] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    {% endfor %}
 
-  <h2 class="govuk-heading-l">Changelog</h2>
+    <h2 class="govuk-heading-l">Changelog</h2>
 
-  <h3 class="govuk-heading-s">4 June 2024</h3>
-  <p class="govuk-body">v0.4</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>Answers have an optional theme_id field, which isn't required for uploads</li>
-  </ul>
+    <h3 class="govuk-heading-s">4 June 2024</h3>
+    <p class="govuk-body">v0.4</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Answers have an optional theme_id field, which isn't required for uploads</li>
+    </ul>
 
-  <h3 class="govuk-heading-s">15 May 2024</h3>
-  <p class="govuk-body">v0.3</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>MultipleChoice now has a schema, the same for both Questions and Answers</li>
-  </ul>
+    <h3 class="govuk-heading-s">15 May 2024</h3>
+    <p class="govuk-body">v0.3</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>MultipleChoice now has a schema, the same for both Questions and Answers</li>
+    </ul>
 
-  <h3 class="govuk-heading-s">6 May 2024</h3>
-  <p class="govuk-body">v0.2</p>
-  <ul class="govuk-list govuk-list--bullet">
-    <li>Question IDs no longer have to be UUIDs, they're just strings</li>
-    <li>Sections do not have IDs</li>
-    <li>ConsultationResponse now has a mandatory submitted_at field, which is a datetime</li>
-    <li>enforce presence of at least one Question, one Answer, one Section and one ConsultationResponse in a ConsultationWithResponses</li>
-    <li>correct definition of Consultation to be an object, not an array</li>
-    <li>multiple_choice is now an optional instead of a nullable field on Answer</li>
-  </ul>
+    <h3 class="govuk-heading-s">6 May 2024</h3>
+    <p class="govuk-body">v0.2</p>
+    <ul class="govuk-list govuk-list--bullet">
+      <li>Question IDs no longer have to be UUIDs, they're just strings</li>
+      <li>Sections do not have IDs</li>
+      <li>ConsultationResponse now has a mandatory submitted_at field, which is a datetime</li>
+      <li>enforce presence of at least one Question, one Answer, one Section and one ConsultationResponse in a ConsultationWithResponses</li>
+      <li>correct definition of Consultation to be an object, not an array</li>
+      <li>multiple_choice is now an optional instead of a nullable field on Answer</li>
+    </ul>
 
-  <h3 class="govuk-heading-s">28 March 2024</h3>
-  <p class="govuk-body">v0.1</p>
-  <p class="govuk-body">Initial release</p>
+    <h3 class="govuk-heading-s">28 March 2024</h3>
+    <p class="govuk-body">v0.1</p>
+    <p class="govuk-body">Initial release</p>
 
+  </div>
 </div>
 {% endblock %}
 

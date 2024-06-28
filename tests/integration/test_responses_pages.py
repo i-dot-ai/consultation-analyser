@@ -43,7 +43,11 @@ def test_get_question_responses_page(django_app):
     # Check responses appear
     assert f"{answer.free_text}" in page_content
     assert (
-        f"<strong>{multiple_choice["question_text"]}</strong> {multiple_choice["options"][0]}"
+        f"{multiple_choice["question_text"]}"
+        in page_content
+    )
+    assert (
+        f"{multiple_choice["options"][0]}"
         in page_content
     )
     if answer.free_text:

@@ -1,4 +1,5 @@
-{%- from "govuk_frontend_jinja/components/footer/macro.html" import govukFooter -%}
+{%- from "components/iai-footer.html" import iaiFooter -%}
+{%- from "components/iai-top-nav.html" import iaiTopNav -%}
 {%- from 'govuk_frontend_jinja/components/phase-banner/macro.html' import govukPhaseBanner -%}
 
 <!DOCTYPE html>
@@ -13,11 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b0c0c">
 
-  <link rel="icon" sizes="48x48" href="{{ static("govuk-assets/images/favicon.ico") }}">
-  <link rel="icon" sizes="any" href="{{ static("govuk-assets/images/favicon.svg") }}" type="image/svg+xml">
-  <link rel="mask-icon" href="{{ static("govuk-assets/images/govuk-icon-mask.svg") }}" color="#0b0c0c">
-  <link rel="apple-touch-icon" href="{{ static("govuk-assets/images/govuk-icon-180.png") }}">
-  <link rel="manifest" href="{{ static("govuk-assets/manifest.json") }}">
+  <link rel="icon" sizes="any" href="{{ static("iai-assets/icons/favicon.ico") }}">
 
   <meta name="robots" content="noindex, nofollow">
   {% compress css %}
@@ -31,40 +28,12 @@
 
   <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
 
-  <header class="govuk-header iai-header" data-module="govuk-header">
-    <div class="govuk-header__container govuk-width-container">
-      <div class="govuk-header__content">
-        <a href="{{ app_config.path }}" class="govuk-header__link govuk-header__service-name">
-          {{ app_config.name }}
-        </a>
-      </div>
-    </div>
-
-    <div class="iai-phase-banner">
-      <div class="govuk-width-container">
-        {{ govukPhaseBanner({
-          "tag": {
-            "text": "Alpha"
-          },
-          "html": 'This is a new service – your <a class="govuk-link" href="https://www.smartsurvey.co.uk/s/GESFSF/">feedback</a> will help us to improve it.'
-        }) }}
-      </div>
-    </div>
-
-    <nav class="x-govuk-primary-navigation" aria-labelledby="primary-navigation-heading">
-      <div class="govuk-width-container">
-        <h2 class="govuk-visually-hidden" id="primary-navigation-heading">Navigation</h2>
-        <ul class="x-govuk-primary-navigation__list">
-          {% for link in app_config.menu_items %}
-            <li class="x-govuk-primary-navigation__item {{ link.get('classes', '') }} {% if link.active %}x-govuk-primary-navigation__item--current {% endif %}">
-              <a class="x-govuk-primary-navigation__link" {% if link.active %}aria-current="page"{% endif %} href="{{link.href}}">{{link.text}}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </nav>
-
-  </header>
+  {{iaiTopNav(
+    product_name = app_config.name,
+    home_path = app_config.path,
+    menu_items = app_config.menu_items,
+    phase = "Alpha"
+  ) }}
 
   {% block pre_content %}
   {% endblock %}
@@ -82,40 +51,31 @@
     </div>
   </main>
 
-  {{ govukFooter({
-    "navigation": [
+  {{ iaiFooter(
+    links = [
       {
-        "title": "About Consult",
-        "width": "full",
-        "items": [
-          {
-            "href": "/privacy/",
-            "text": "Privacy policy"
-          },
-          {
-            "href": "/schema/",
-            "text": "Data schema"
-          },
-          {
-            "href": "https://www.smartsurvey.co.uk/s/consultation-interest/",
-            "text": "Register your interest"
-          },
-        ]
+        "href": "/privacy/",
+        "text": "Privacy notice"
+      },
+      {
+        "href": "/schema/",
+        "text": "Data schema"
+      },
+      {
+        "href": "https://www.smartsurvey.co.uk/s/consultation-interest/",
+        "text": "Register your interest"
+      },
+      {
+        "href": version.url(),
+        "text": version.version_string()
       }
     ],
-    "meta": {
-      "items": [
-        {
-          "href": "/privacy/",
-          "text": "Privacy notice"
-        },
-        {
-          "href": version.url(),
-          "text": version.version_string()
-        },
-      ]
-    }
-  }) }}
+    feedback_link = "https://www.smartsurvey.co.uk/s/GESFSF/"
+  ) }}
+
+  {% compress js %}
+    <script src="{{ static("iai-assets/iai-design-system.js") }}"></script>
+  {% endcompress %}
 
 </body>
 

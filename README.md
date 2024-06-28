@@ -74,6 +74,8 @@ dev_environment`, but you can run it more than once.
 make dummy_data
 ```
 
+Or go to `/support/consultations/` and generate a dummy consultation from there.
+
 ### Database migrations and schema diagram
 
 If you use the `make migrate` command to run migrations, the diagram below will

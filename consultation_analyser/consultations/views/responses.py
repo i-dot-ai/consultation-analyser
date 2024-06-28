@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpRequest
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from .. import models
 from .decorators import user_can_see_consultation
@@ -11,6 +11,7 @@ from .filters import get_applied_filters, get_filtered_responses
 @user_can_see_consultation
 @login_required
 def index(request: HttpRequest, consultation_slug: str, section_slug: str, question_slug: str):
+    consultation = get_object_or_404(models.Consultation, slug=consultation_slug)
     question = models.Question.objects.get(
         slug=question_slug,
         section__slug=section_slug,
@@ -28,6 +29,7 @@ def index(request: HttpRequest, consultation_slug: str, section_slug: str, quest
     paginated_responses = current_page.object_list
 
     context = {
+        "consultation_name": consultation.name,
         "consultation_slug": consultation_slug,
         "question": question,
         "responses": paginated_responses,

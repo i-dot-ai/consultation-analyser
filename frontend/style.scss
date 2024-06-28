@@ -61,9 +61,14 @@ $iai-colour-pink: #C50878;
     background-color: white;
     color: $iai-colour-pink;
 }
-.x-govuk-masthead--pink .govuk-button {
-    box-shadow: 0 2px 0 govuk-colour("dark-grey");
+.x-govuk-masthead--pink .govuk-button, .x-govuk-masthead--pink .govuk-button:visited {
+    background-color: white;
+    box-shadow: none;
     color: $iai-colour-pink;
+    display: inline-flex;
+}
+.x-govuk-masthead--pink .govuk-button:hover {
+    background-color: #e5e5e5 !important;
 }
 .x-govuk-primary-navigation__link {
     color: govuk-colour("dark-grey") !important;
@@ -71,6 +76,7 @@ $iai-colour-pink: #C50878;
 .x-govuk-primary-navigation__item--current {
     border-bottom-color: govuk-colour("dark-grey");
 }
+
 
 .x-govuk-primary-navigation__item--right {
     float: right;
@@ -95,36 +101,6 @@ $iai-colour-pink: #C50878;
 
 
 /** QUESTION SUMMARY PAGE **/
-
-.govuk-table__cell:has(.iai-bar) {
-    padding: 0.25rem 0;
-    vertical-align: middle;
-}
-.iai-bar {
-    align-items: center;
-    display: flex;
-    height: 46px;
-    position: relative;
-    vertical-align: middle;
-}
-.iai-bar__value {
-    padding: 0 0.25rem;
-    position: relative;
-    z-index: 10;
-}
-.iai-bar__bar {
-    background-color: govuk-colour("light-blue");
-    display: block;
-    height: 100%;
-    left: 0;
-    opacity: 0.3;
-    position: absolute;
-    top: 0;
-}
-.iai-bar__bar.animate {
-    transition: width 1s;
-}
-
 .iai-inline-list {
     display: flex;
     flex-wrap: wrap;
@@ -134,7 +110,15 @@ $iai-colour-pink: #C50878;
     margin-left: 2rem;
 }
 
+
 /** CONSULTATION PAGE **/
+.con-question-list {
+    border-radius: 0.25rem;
+    background-color: white;
+}
+.con-question-list__item {
+    border-top: 1px solid #E5E7EB;
+}
 .iai-key-finding {
     align-items: center;
     background-color: govuk-colour("light-grey");
@@ -197,7 +181,7 @@ pre code {
     margin: 0.25rem 0;
 }
 
-.govuk-notification-banner--warning {
-  background-color: govuk-colour("red");
-  border-color: govuk-colour("red");
+:root {
+    --fonts-prefix: "iai-assets";
 }
+@import "iai-assets/styles.scss";
