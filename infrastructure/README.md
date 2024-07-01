@@ -51,7 +51,7 @@
 
 ## Passing environment variables into ECS - how to give your docker runtime environment variables.
 1. This is done through `./infrastructure/ecs.tf` in `environment_variables`
-2. If this is a secret, add the secret to Secrets Manager and tag it with the key `SecretPurpose` and the value of `general`
+2. If this is a secret, add the secret to Secrets Manager and tag it with the key `platform:secret-purpose` and the value of `general`
 3. Replicate the pattern used with the `django_secret` in `./infrastructure/secrets.tf`
 4. And pass in the secretsmanager secret_string into the environment variables like `DJANGO_SECRET_KEY`
    1. **Do not hardcode any secrets into these variables**

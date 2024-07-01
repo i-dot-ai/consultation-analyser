@@ -13,6 +13,6 @@ module "rds" {
   publicly_accessible     = var.publicly_accessible
   securelist_ips          = concat(var.developer_ips, var.internal_ips)
   secret_tags = {
-    SecretPurpose : "general"
+    "platform:secret-purpose" : "general"
   }
 }
