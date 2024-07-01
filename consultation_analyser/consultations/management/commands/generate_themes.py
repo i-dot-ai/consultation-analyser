@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 
@@ -25,7 +26,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--input",
+            "--input_file",
             action="store",
             help="A path to a JSON file containing a ConsultationWithResponses",
             type=str,
@@ -52,11 +53,20 @@ class Command(BaseCommand):
             action="store",
             help="The output directory - defaults to tmp/eval/$consultation-slug-$unixtime",
         )
+        parser.add_argument(
+            "--consultation_slug",
+            action="store",
+            help="The slug of the consultation to process",
+        )
 
     def handle(self, *args, **options):
-        logger.info(f"Called evaluate with {options}")
+        logger.info(f"Called generate_themes with {options}")
 
-        consultation = self.__load_consultation(input_file=options["input"], clean=options["clean"])
+        consultation = self.__load_consultation(
+            consultation_slug=options["consultation_slug"],
+            input_file=options["input_file"],
+            clean=options["clean"],
+        )
         output_dir = self.__get_output_dir(
             output_dir=options["output_dir"], consultation=consultation
         )
@@ -69,21 +79,29 @@ class Command(BaseCommand):
             consultation, topic_backend=topic_backend, llm_backend=llm_backend
         )
 
+        logger.info(f"Generated themes for consultation {consultation.name}")
+
         self.__save_consultation_with_themes(output_dir=output_dir, consultation=consultation)
 
         logger.info(f"Wrote results to {output_dir}")
 
-    def __load_consultation(self, input_file: str, clean: Optional[bool]):
-        if not input_file:
-            raise Exception("You need to specify an input file")
+    def __load_consultation(self, consultation_slug: str, input_file: str, clean: Optional[bool]):
+        if (not input_file and not consultation_slug) or (input_file and consultation_slug):
+            raise Exception("Please specify either --input_file or --consultation_slug")
+
+        if consultation_slug:
+            return models.Consultation.objects.get(slug=consultation_slug)
 
         # upload, cleaning if required
         if clean:
             input_json = json.loads(open(input_file).read())
             name = input_json["consultation"]["name"]
-            old_consultation = models.Consultation.objects.get(name=name)
-            old_consultation.delete()
-            logger.info("Removed original consultation")
+            try:
+                old_consultation = models.Consultation.objects.get(name=name)
+                old_consultation.delete()
+                logger.info("Removed original consultation")
+            except ObjectDoesNotExist:
+                logger.info("No existing consultation to clean, moving on")
 
         try:
             user = User.objects.filter(email="email@example.com").first()

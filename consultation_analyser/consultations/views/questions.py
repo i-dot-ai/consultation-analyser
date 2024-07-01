@@ -46,6 +46,7 @@ def show(request: HttpRequest, consultation_slug: str, section_slug: str, questi
     blank_free_text_count = (
         models.Answer.objects.filter(question=question).filter(free_text="").count()
     )
+
     outliers_count = (
         models.Answer.objects.filter(question=question).filter(theme__is_outlier=True).count()
     )

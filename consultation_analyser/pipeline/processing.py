@@ -60,7 +60,7 @@ def run_processing_pipeline(consultation):
         command = {
             "command": [
                 "venv/bin/django-admin",
-                "run_ml_pipeline",
+                "generate_themes",
                 "--consultation_slug",
                 consultation.slug,
             ]

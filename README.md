@@ -121,20 +121,22 @@ The `generate_themes` command will accept a JSON file containing a `Consultation
 
 Invoke the command like this, replacing the input file with your JSON.
 ```
-poetry run python manage.py generate_themes --input=tests/examples/chocolate.json --clean
+poetry run python manage.py generate_themes --input_file=tests/examples/chocolate.json --clean
 ```
 
 Options available for this command are:
 
-`--clean`: delete this consultation if it already exists in the database.
-`--llm`: which llm to use. Pass `fake`, `sagemaker`, or `ollama/model_name`.
-`--embdedding_model`: pass the model for `SentenceTransformers` to use in the `BERTopic` pipeline. If `fake` is passed, random topics will be generated.
+- `--clean`: delete this consultation if it already exists in the database.
+- `--input_file`: use this JSON as input.
+- `--consultation_slug`: the slug of a consultation already existing in the database.
+- `--llm`: which llm to use. Pass `fake`, `sagemaker`, or `ollama/model_name`.
+- `--embdedding_model`: pass the model for `SentenceTransformers` to use in the `BERTopic` pipeline. If `fake` is passed, random topics will be generated.
 
 The resulting file will be placed in `tmp/outputs` and its path will be printed on the console.
 
 If you are using SageMaker you will need to specify the name of your endpoint in the enviroment variable `SAGEMAKER_ENDPOINT_NAME`.
 
-If you are using Ollama, you will have to install the app (e.g. `brew install ollama`) and have it running `ollama serve`. You will need to run your models e.g. `ollama run mistral`.
+If you are using Ollama, you will have to install the app (e.g. `brew install ollama`) and have it running (`ollama serve`). You will need to run your models e.g. `ollama run mistral`.
 
 
 ## Schema documentation
