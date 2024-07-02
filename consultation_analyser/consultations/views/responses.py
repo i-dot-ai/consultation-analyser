@@ -1,9 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpRequest
 from django.shortcuts import render
 
 from .. import models
+from .consultations import NO_THEMES_YET_MESSAGE
 from .decorators import user_can_see_consultation
 from .filters import get_applied_filters, get_filtered_responses
 
@@ -16,6 +18,11 @@ def index(request: HttpRequest, consultation_slug: str, section_slug: str, quest
         section__slug=section_slug,
         section__consultation__slug=consultation_slug,
     )
+
+    consultation = question.section.consultation
+    if not consultation.has_themes():
+        messages.info(request, NO_THEMES_YET_MESSAGE)
+
     themes_for_question = models.Theme.objects.filter(answer__question=question).distinct()
     total_responses = models.Answer.objects.filter(question=question).count()
     applied_filters = get_applied_filters(request)

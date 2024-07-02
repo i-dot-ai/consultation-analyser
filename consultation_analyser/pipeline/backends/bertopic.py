@@ -58,9 +58,7 @@ class BERTopicBackend(TopicBackend):
         logger.info("BERTopic topic model generation")
         self.topic_model = self.__get_topic_model(answers_list_with_embeddings)
 
-        answers_topics_df = self.__get_answers_and_topics(
-            self.topic_model, answers_list
-        )
+        answers_topics_df = self.__get_answers_and_topics(self.topic_model, answers_list)
 
         assignments = []
         for row in answers_topics_df.itertuples():
