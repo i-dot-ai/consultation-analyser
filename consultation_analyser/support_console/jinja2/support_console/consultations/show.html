@@ -8,10 +8,9 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">{{ page_title }}</h1>
-        {% if number_of_themes %}
-          <p class="govuk-body">For this consultation there are {{number_of_themes | intcomma}} themes.</p>
-          <p class="govuk-body">Of these themes, {{number_of_themes_with_summaries | intcomma}} have summaries, {{number_of_themes_unable_to_summarise | intcomma}} themes we were unable to summarise, and {{number_of_themes_not_yet_summarised | intcomma}} themes have not yet been summarised.</p>
-
+        {% if total_themes %}
+          <p class="govuk-body">In the latest run of the theme generation, there are {{total_themes | intcomma}} themes for this consultation.</p>
+          <p class="govuk-body">Of these themes, {{total_with_summaries | intcomma}} have summaries.</p>
         {% else %}
           <p class="govuk-body">There are no themes for this consultation.</p>
         {% endif %}
@@ -88,7 +87,7 @@
         }) }}
 
         <h2 class="govuk-heading-m">Download JSON</h2>
-        {% if number_of_themes %}
+        {% if total_themes %}
           <p class="govuk-body">This consultation has themes, so the JSON will be in the <a class="govuk-link" href="/schema/consultation_with_responses_and_themes_schema.json">ConsultationWithResponsesAndThemes</a> format.</p>
         {% else %}
           <p class="govuk-body">This consultations has no themes, this JSON will be in the <a class="govuk-link" href="/schema/consultation_with_responses_schema.json">ConsultationWithResponses</a> format.</p>

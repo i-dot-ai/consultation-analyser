@@ -16,7 +16,13 @@ def index(request: HttpRequest, consultation_slug: str, section_slug: str, quest
         section__slug=section_slug,
         section__consultation__slug=consultation_slug,
     )
-    themes_for_question = models.Theme.objects.filter(answer__question=question).distinct()
+    consultation = question.section.consultation
+    # TODO - for now, get themes from latest processing run
+    latest_processing_run = consultation.latest_processing_run
+    if latest_processing_run:
+        themes_for_question = latest_processing_run.get_themes_for_question(question_id=question.id)
+    else:
+        themes_for_question = models.Theme.objects.none()
     total_responses = models.Answer.objects.filter(question=question).count()
     applied_filters = get_applied_filters(request)
     responses = get_filtered_responses(question, applied_filters)

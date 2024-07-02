@@ -29,9 +29,10 @@ class LangchainLLMBackend(LLMBackend):
             theme, encoding=self.model_encoding, max_tokens=self.max_tokens
         )
 
+        question = models.Answer.objects.filter(themes=theme).first().question
         prompt_inputs = {
-            "consultation_name": theme.question.section.consultation.name,
-            "question": theme.question.text,
+            "consultation_name": theme.processing_run.consultation.name,
+            "question": question.text,
             "keywords": ", ".join(theme.topic_keywords),
             "responses": sample_responses,
         }
@@ -126,7 +127,7 @@ class LangchainLLMBackend(LLMBackend):
 def get_random_sample_of_responses_for_theme(
     theme: models.Theme, encoding: tiktoken.Encoding, max_tokens: int
 ) -> str:
-    responses_for_theme = models.Answer.objects.filter(theme=theme).order_by("?")
+    responses_for_theme = models.Answer.objects.filter(themes=theme).order_by("?")
     free_text_responses_for_theme = responses_for_theme.values_list("free_text", flat=True)
 
     # TWILIGHT ZONE: https://code.djangoproject.com/ticket/30655

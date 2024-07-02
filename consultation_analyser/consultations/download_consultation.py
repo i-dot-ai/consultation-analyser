@@ -2,7 +2,6 @@ import json
 
 from django.forms.models import model_to_dict
 
-from consultation_analyser.consultations.models import Theme
 from consultation_analyser.consultations.public_schema import (
     ConsultationWithResponses,
     ConsultationWithResponsesAndThemes,
@@ -16,7 +15,8 @@ def select_keys_from_model(model, keys):
 
 def consultation_to_json(consultation):
     """
-    Return the consultation in a format compliant with the public schema
+    Return the consultation in a format compliant with the public schema.
+    For now, always get the latest themes.
 
     Raises:
         pydantic.ValidationError: if the generated JSON is not compliant
@@ -25,14 +25,15 @@ def consultation_to_json(consultation):
     attrs = {}
 
     themes = []
-    theme_records = Theme.objects.filter(answer__question__section__consultation=consultation)
-    for theme in theme_records:
-        theme_attrs = select_keys_from_model(
-            theme, ["topic_id", "topic_keywords", "summary", "short_description"]
-        )
+    latest_processing_run = consultation.latest_processing_run
+    if latest_processing_run:
+        for theme in latest_processing_run.themes:
+            theme_attrs = select_keys_from_model(
+                theme, ["topic_id", "topic_keywords", "summary", "short_description"]
+            )
 
-        theme_attrs["id"] = str(theme.id)
-        themes.append(theme_attrs)
+            theme_attrs["id"] = str(theme.id)
+            themes.append(theme_attrs)
 
     attrs["consultation"] = select_keys_from_model(consultation, ["name"])
 
@@ -61,8 +62,11 @@ def consultation_to_json(consultation):
             answer_attrs = select_keys_from_model(
                 answer, ["question", "multiple_choice", "free_text"]
             )
-
-            answer_attrs["theme_id"] = str(answer.theme.id) if answer.theme else None
+            # TODO - for now, the assumption is at most one theme per answer
+            if latest_processing_run:
+                themes_for_answer = latest_processing_run.get_themes_for_answer(answer_id=answer.id)
+                latest_theme = themes_for_answer.last()
+                answer_attrs["theme_id"] = str(latest_theme.id) if latest_theme else None
             answer_attrs["question_id"] = str(answer_attrs.pop("question"))
             answers.append(answer_attrs)
 

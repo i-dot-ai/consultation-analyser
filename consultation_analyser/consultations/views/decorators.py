@@ -13,7 +13,7 @@ def user_can_see_consultation(view_function):
             models.Consultation.objects.filter(slug=slug, users__in=[request.user])
         )
 
-        if not consultation.has_themes():
+        if not consultation.has_processing_run():
             messages.info(
                 request, "We are processing your consultation. Themes have not been generated yet."
             )

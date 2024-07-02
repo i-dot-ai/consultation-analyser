@@ -1,20 +1,18 @@
 import logging
 
-from consultation_analyser.consultations.models import Theme
+from consultation_analyser.consultations.models import ProcessingRun
 from consultation_analyser.pipeline.backends.llm_backend import LLMBackend
 
 logger = logging.getLogger("pipeline")
 
 
-def create_llm_summaries_for_consultation(consultation, llm_backend: LLMBackend):
+def create_llm_summaries_for_processing_run(llm_backend: LLMBackend, processing_run: ProcessingRun):
+    consultation = processing_run.consultation
     logger.info(
         f"Starting LLM summarisation for consultation: {consultation.name} with backend {llm_backend.__class__.__name__}"
     )
-    themes = Theme.objects.filter(question__section__consultation=consultation).filter(
-        question__has_free_text=True
-    )
 
-    for theme in themes:
+    for theme in processing_run.themes:
         logger.info(f"Starting LLM summarisation for theme with keywords: {theme.topic_keywords}")
         if theme.is_outlier:
             theme.short_description = "Outliers"

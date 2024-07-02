@@ -21,8 +21,7 @@ def test_name_parameter_sets_consultation_name(mock_is_local):
     assert models.Question.objects.count() == 10
     assert models.Answer.objects.count() >= 100
 
-    qs = models.Answer.objects.filter(theme__is_outlier=True)
-    assert qs.exists()
+    assert models.Theme.objects.filter(is_outlier=True).exists()
 
     assert models.Consultation.objects.first().name == "My special consultation"
     assert models.Consultation.objects.first().slug == "my-special-consultation"

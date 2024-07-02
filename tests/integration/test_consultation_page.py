@@ -7,7 +7,7 @@ from tests.helpers import sign_in
 @pytest.mark.django_db
 def test_consultation_page(django_app):
     user = UserFactory()
-    consultation = ConsultationFactory(with_themes=True, user=user)
+    consultation = ConsultationFactory(with_question=True, user=user)
 
     sign_in(django_app, user.email)
 

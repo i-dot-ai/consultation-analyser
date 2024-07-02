@@ -48,7 +48,7 @@ def upload_consultation(file, user):
         response = ConsultationResponse(**response_attrs)
         response.save()
         for answer_attrs in answers:
-            if answer_attrs.get("theme_id"):
+            if "theme_id" in answer_attrs.keys():
                 answer_attrs.pop("theme_id")  # discard this if present
             answer_attrs["consultation_response_id"] = response.id
             question_id = answer_attrs.pop("question_id")

@@ -41,8 +41,8 @@ class Consultation(UUIDPrimaryKeyModel, TimeStampedModel):
     slug = models.CharField(null=False, max_length=256)
     users = models.ManyToManyField(User)
 
-    def has_themes(self):
-        return Theme.objects.filter(answer__question__section__consultation=self).exists()
+    def has_processing_run(self):
+        return ProcessingRun.objects.filter(consultation=self).exists()
 
     class Meta(UUIDPrimaryKeyModel.Meta, TimeStampedModel.Meta):
         constraints = [
@@ -59,6 +59,12 @@ class Consultation(UUIDPrimaryKeyModel, TimeStampedModel):
         Theme.objects.filter(answer__question__section__consultation=self).delete()
 
         super().delete(*args, **kwargs)
+
+    @property
+    def latest_processing_run(self):
+        processing_runs = ProcessingRun.objects.filter(consultation=self).order_by("created_at")
+        latest = processing_runs.last() if processing_runs else None
+        return latest
 
 
 class Section(UUIDPrimaryKeyModel, TimeStampedModel):
@@ -105,22 +111,53 @@ class ConsultationResponse(UUIDPrimaryKeyModel, TimeStampedModel):
         pass
 
 
+class ProcessingRun(UUIDPrimaryKeyModel, TimeStampedModel):
+    consultation = models.ForeignKey(Consultation, on_delete=models.CASCADE)
+    # TODO - add more processing run metadata
+
+    @property
+    def themes(self):
+        return Theme.objects.filter(processing_run=self).distinct()
+
+    def get_themes_for_answer(self, answer_id):
+        # At the moment, at most one theme per answer and run but
+        # likely to change in future.
+        return self.themes.filter(answer__id=answer_id)
+
+    def get_themes_for_question(self, question_id):
+        return self.themes.filter(processing_run=self, answer__question_id=question_id).distinct()
+
+    class Meta(UUIDPrimaryKeyModel.Meta, TimeStampedModel.Meta):
+        pass
+
+
+class TopicModelMetadata(UUIDPrimaryKeyModel, TimeStampedModel):
+    # TODO -  Some other metadata on the model TBC and link to saved model
+
+    class Meta(UUIDPrimaryKeyModel.Meta, TimeStampedModel.Meta):
+        pass
+
+
 class Theme(UUIDPrimaryKeyModel, TimeStampedModel):
-    # LLM generates short_description and summary
-    short_description = models.TextField(blank=True)
-    summary = models.TextField(blank=True)  # More detailed description
-    # Duplicates info in Answer model, but needed for uniqueness constraint.
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
-    # Topic keywords and ID come from BERTopic
+    processing_run = models.ForeignKey(ProcessingRun, on_delete=models.CASCADE, null=True)
+    # Topic model, keywords and ID come from BERTopic
+    topic_model_metadata = models.ForeignKey(
+        TopicModelMetadata, on_delete=models.CASCADE, null=True
+    )
     topic_keywords = models.JSONField(default=list)
     topic_id = models.IntegerField(null=True)  # Topic ID from BERTopic
     is_outlier = models.GeneratedField(
         expression=models.Q(topic_id=-1), output_field=models.BooleanField(), db_persist=True
     )
+    # LLM generates short_description and summary
+    short_description = models.TextField(blank=True)
+    summary = models.TextField(blank=True)  # More detailed description
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["topic_id", "question"], name="unique_up_to_question"),
+            models.UniqueConstraint(
+                fields=["topic_id", "topic_model_metadata"], name="unique_id_per_model"
+            ),
         ]
 
 
@@ -148,17 +185,23 @@ class Answer(UUIDPrimaryKeyModel, TimeStampedModel):
     free_text = models.TextField(null=True, blank=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     consultation_response = models.ForeignKey(ConsultationResponse, on_delete=models.CASCADE)
-    theme = models.ForeignKey(
-        Theme, on_delete=models.SET_NULL, null=True, blank=True
-    )  # For now, just one theme per answer
+    themes = models.ManyToManyField(Theme)
 
     class Meta(UUIDPrimaryKeyModel.Meta, TimeStampedModel.Meta):
         pass
 
-    def save_theme_to_answer(self, topic_keywords: list, topic_id: int):
-        question = self.question
+    def save_theme_to_answer(
+        self,
+        topic_keywords: list,
+        topic_id: int,
+        processing_run: ProcessingRun,
+        topic_model_metadata: TopicModelMetadata,
+    ):
         theme, _ = Theme.objects.get_or_create(
-            question=question, topic_keywords=topic_keywords, topic_id=topic_id
+            topic_keywords=topic_keywords,
+            topic_id=topic_id,
+            processing_run=processing_run,
+            topic_model_metadata=topic_model_metadata,
         )
-        self.theme = theme
+        self.themes.add(theme)
         self.save()

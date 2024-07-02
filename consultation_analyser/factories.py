@@ -40,8 +40,8 @@ class ConsultationFactory(factory.django.DjangoModelFactory):
         model = models.Consultation
         skip_postgeneration_save = True
 
-    name = faker.sentence()
-    slug = faker.slug()
+    name = factory.LazyAttribute(lambda _o: faker.sentence())
+    slug = factory.LazyAttribute(lambda _o: faker.slug())
 
     @factory.post_generation
     def with_question(consultation, creation_strategy, value, **kwargs):
@@ -138,10 +138,24 @@ class ConsultationResponseFactory(factory.django.DjangoModelFactory):
         model = models.ConsultationResponse
 
 
+class ProcessingRunFactory(factory.django.DjangoModelFactory):
+    consultation = factory.SubFactory(ConsultationFactory)
+
+    class Meta:
+        model = models.ProcessingRun
+
+
+class TopicModelMetadataFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.TopicModelMetadata
+
+
 class ThemeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Theme
 
+    processing_run = factory.SubFactory(ProcessingRunFactory)
+    topic_model_metadata = factory.SubFactory(TopicModelMetadataFactory)
     topic_keywords = factory.LazyAttribute(lambda _o: generate_dummy_topic_keywords())
     short_description = factory.LazyAttribute(lambda _o: faker.sentence())
     summary = factory.LazyAttribute(lambda _o: faker.sentence())
@@ -180,12 +194,18 @@ class AnswerFactory(factory.django.DjangoModelFactory):
 
     question = factory.SubFactory(QuestionFactory)
     consultation_response = factory.SubFactory(ConsultationResponseFactory)
-    theme = factory.LazyAttribute(lambda o: ThemeFactory() if o.question.has_free_text else None)
 
     multiple_choice = factory.LazyAttribute(get_multiple_choice_answers)
 
     class Params:
         multiple_choice_answers = None
+
+    @factory.post_generation
+    def with_themes(self, creation_strategy, value, **kwargs):
+        if value is True:
+            processing_run = ProcessingRunFactory(consultation=self.question.section.consultation)
+            theme = ThemeFactory(processing_run=processing_run)
+            self.themes.add(theme)
 
     @factory.post_generation
     def validate_json_fields(answer, creation_strategy, extracted, **kwargs):

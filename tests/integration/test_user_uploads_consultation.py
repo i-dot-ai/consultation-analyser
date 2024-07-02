@@ -2,9 +2,9 @@ import pytest
 from django.conf import settings
 from webtest import Upload
 
-from consultation_analyser.factories import UserFactory
+from consultation_analyser.factories import ProcessingRunFactory, UserFactory
 from consultation_analyser.pipeline.backends.dummy_topic_backend import DummyTopicBackend
-from consultation_analyser.pipeline.ml_pipeline import save_themes_for_consultation
+from consultation_analyser.pipeline.ml_pipeline import save_themes_for_processing_run
 from tests.helpers import sign_in
 
 
@@ -34,12 +34,13 @@ def test_user_uploads_consultation(django_app):
     # then I should see a success page
     assert "Consultation uploaded" in success_page
 
-    # and when I visit the consultation again I should still see a processing message
+    # and when I visit the consultation again I shouldn't still see a processing message
     consultation = user.consultation_set.first()
+    processing_run = ProcessingRunFactory(consultation=consultation)
     processing_page = django_app.get(f"/consultations/{consultation.slug}/")
-    assert "processing your consultation" in processing_page
+    assert "processing your consultation" not in processing_page
 
-    save_themes_for_consultation(consultation.id, DummyTopicBackend())
+    save_themes_for_processing_run(DummyTopicBackend(), processing_run)
 
     consultation_page = django_app.get(f"/consultations/{consultation.slug}/")
     assert consultation.name in consultation_page

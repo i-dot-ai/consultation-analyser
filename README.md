@@ -163,4 +163,4 @@ Then
 npm run dev
 ```
 
-The actual prototype can be accessed at http://localhost:3000/prototype
+The actual prototype can be accessed at http://localhost:3000/prototype.

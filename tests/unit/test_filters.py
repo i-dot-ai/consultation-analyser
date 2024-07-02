@@ -12,33 +12,42 @@ def set_up_for_filters():
     question = factories.QuestionFactory(
         section=section,
     )
-
-    theme1 = factories.ThemeFactory(topic_keywords=["dog", "puppy"], question=question)
-    theme2 = factories.ThemeFactory(topic_keywords=["cat", "kitten"], question=question)
-    factories.AnswerFactory(
-        theme=theme1,
+    processing_run = factories.ProcessingRunFactory(consultation=consultation)
+    topic_model_meta = factories.TopicModelMetadataFactory()
+    theme1 = factories.ThemeFactory(
+        topic_keywords=["dog", "puppy"],
+        processing_run=processing_run,
+        topic_model_metadata=topic_model_meta,
+    )
+    theme2 = factories.ThemeFactory(
+        topic_keywords=["cat", "kitten"],
+        processing_run=processing_run,
+        topic_model_metadata=topic_model_meta,
+    )
+    answer = factories.AnswerFactory(
         question=question,
         free_text="We love dogs.",
         consultation_response=consultation_response,
     )
-    factories.AnswerFactory(
-        theme=theme2,
+    answer.themes.add(theme1)
+    answer = factories.AnswerFactory(
         question=question,
         free_text="We like cats not dogs.",
         consultation_response=consultation_response,
     )
-    factories.AnswerFactory(
-        theme=theme2,
+    answer.themes.add(theme2)
+    answer = factories.AnswerFactory(
         question=question,
         free_text="We love cats.",
         consultation_response=consultation_response,
     )
-    factories.AnswerFactory(
-        theme=theme2,
+    answer.themes.add(theme2)
+    answer = factories.AnswerFactory(
         question=question,
         free_text=None,
         consultation_response=consultation_response,
     )
+    answer.themes.add(theme2)
     return question
 
 
@@ -71,11 +80,22 @@ def test_get_filtered_responses_themes():
 @pytest.mark.django_db
 def test_get_filtered_themes():
     question = set_up_for_filters()
-    answers_queryset = models.Answer.objects.all()
+    consultation = question.section.consultation
+    # answers_queryset = models.Answer.objects.all()
     theme2 = models.Theme.objects.all().order_by("created_at").last()
     applied_filters = {"keyword": "", "theme": theme2.id}
     queryset = filters.get_filtered_themes(
-        question=question, filtered_answers=answers_queryset, applied_filters=applied_filters
+        question=question,
+        applied_filters=applied_filters,
+        processing_run=consultation.latest_processing_run,
     )
     assert queryset.count() == 1
     assert queryset[0].topic_keywords == ["cat", "kitten"]
+    # Delete processing runs
+    models.ProcessingRun.objects.filter(consultation=consultation).delete()
+    queryset = filters.get_filtered_themes(
+        question=question,
+        applied_filters=applied_filters,
+        processing_run=consultation.latest_processing_run,
+    )
+    assert queryset.count() == 0

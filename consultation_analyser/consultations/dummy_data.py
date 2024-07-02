@@ -6,9 +6,11 @@ from consultation_analyser.factories import (
     ConsultationFactory,
     ConsultationResponseFactory,
     FakeConsultationData,
+    ProcessingRunFactory,
     QuestionFactory,
     SectionFactory,
     ThemeFactory,
+    TopicModelMetadataFactory,
 )
 from consultation_analyser.hosting_environment import HostingEnvironment
 
@@ -55,34 +57,36 @@ def create_dummy_data(responses=10, include_themes=True, number_questions=10, **
                         question=q,
                         consultation_response=response,
                         free_text=free_text_answer,
-                        theme=None,
                     )
                 )
                 # Force some answers to have no free text response
                 if random.randrange(1, 4) == 1:
-                    answers.append(
-                        AnswerFactory(
-                            question=q,
-                            consultation_response=response,
-                            free_text="",
-                            theme=None,
-                        )
+                    ans = AnswerFactory(
+                        question=q,
+                        consultation_response=response,
+                        free_text="",
                     )
+                    ans.themes.clear()
+                    answers.append(ans)
             else:
-                answers.append(
-                    AnswerFactory(question=q, consultation_response=response, theme=None)
-                )
+                ans = AnswerFactory(question=q, consultation_response=response)
+                ans.themes.clear()
+                answers.append(ans)
 
         if include_themes:
             # Set themes per question, multiple answers with the same theme
+            processing_run = ProcessingRunFactory(consultation=consultation)
             for q in questions:
-                themes = [ThemeFactory(topic_id=i) for i in range(-1, 4)]
-                for a in answers:
+                tm = TopicModelMetadataFactory()
+                themes = [
+                    ThemeFactory(topic_model_metadata=tm, topic_id=i, processing_run=processing_run)
+                    for i in range(-1, 4)
+                ]
+                for a in answers[1:]:
                     random_theme = random.choice(themes)
-                    a.theme = random_theme
+                    a.themes.add(random_theme)
                     a.save()
             # Force at least one answer to be an outlier
-            a = random.choice(answers)
-            a.theme = themes[0]
-            a.save()
+            answers[0].themes.add(themes[0])
+            answers[0].save()
     return consultation

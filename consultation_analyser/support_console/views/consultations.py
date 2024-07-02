@@ -46,6 +46,18 @@ def delete(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     return render(request, "support_console/consultations/delete.html", context=context)
 
 
+def get_number_themes_latest_run(consultation):
+    total_themes = 0
+    total_with_summaries = 0
+    if consultation.has_processing_run():
+        processing_run = consultation.latest_processing_run
+        total_themes = processing_run.themes.count()
+        total_with_summaries = (
+            processing_run.themes.exclude(summary="").exclude(summary=NO_SUMMARY_STR).count()
+        )
+    return total_themes, total_with_summaries
+
+
 @staff_member_required
 def show(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     consultation = models.Consultation.objects.get(id=consultation_id)
@@ -62,23 +74,13 @@ def show(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
 
     except RuntimeError as error:
         messages.error(request, error.args[0])
-    themes_for_consultation = models.Theme.objects.filter(
-        answer__question__section__consultation=consultation
-    ).distinct()
-    number_of_themes = themes_for_consultation.count()
-    number_of_themes_with_summaries = (
-        themes_for_consultation.exclude(summary="").exclude(summary=NO_SUMMARY_STR).count()
-    )
-    number_of_themes_unable_to_summarise = themes_for_consultation.filter(
-        summary=NO_SUMMARY_STR
-    ).count()
-    number_of_themes_not_yet_summarised = themes_for_consultation.filter(summary="").count()
+
+    total_themes, total_with_summaries = get_number_themes_latest_run(consultation)
+    # TODO - find a better way to summarise themes by question
     context = {
         "consultation": consultation,
         "users": consultation.users.all(),
-        "number_of_themes": number_of_themes,
-        "number_of_themes_with_summaries": number_of_themes_with_summaries,
-        "number_of_themes_unable_to_summarise": number_of_themes_unable_to_summarise,
-        "number_of_themes_not_yet_summarised": number_of_themes_not_yet_summarised,
+        "total_themes": total_themes,
+        "total_with_summaries": total_with_summaries,
     }
     return render(request, "support_console/consultations/show.html", context=context)
