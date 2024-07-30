@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage as storage
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render
 
 from consultation_analyser.consultations.jobs.upload_consultation import async_upload_consultation
 
@@ -44,7 +44,9 @@ def show(
     else:
         try:
             processing_run = consultation.get_processing_run(processing_run_slug)
-        except models.ProcessingRun.DoesNotExist: # Should only have processing runs from that consultation
+        except (
+            models.ProcessingRun.DoesNotExist
+        ):  # Should only have processing runs from that consultation
             return Http404
 
     questions = models.Question.objects.filter(section__consultation__slug=consultation_slug)
@@ -52,7 +54,7 @@ def show(
         "questions": questions,
         "consultation": consultation,
         "processing_run": processing_run,
-        "all_runs": all_runs_for_consultation
+        "all_runs": all_runs_for_consultation,
     }
     return render(request, "consultations/consultations/show.html", context)
 
