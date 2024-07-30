@@ -18,6 +18,28 @@
 
   {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 
+  <h2 class="govuk-body-s govuk-!-display-block govuk-!-font-weight-bold">Filters</h2>
+  <form>
+
+    <div class="govuk-form-group">
+      <label class="govuk-label" for="run">
+        Processing run
+      </label>
+      <select class="govuk-select" id="run" name="run">
+        {% for run in all_runs %}
+          <option value="{{ run.id }}">{{ run.created_at }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+      {{ govukButton({
+        "text": "Select this run",
+        "classes": "govuk-!-margin-bottom-2"
+      }) }}
+
+
+  </form>
+
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
       <div class="con-question-list">
