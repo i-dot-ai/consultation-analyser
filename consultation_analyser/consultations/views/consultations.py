@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage as storage
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 
 from consultation_analyser.consultations.jobs.upload_consultation import async_upload_consultation
 
@@ -36,16 +36,23 @@ def show(
     consultation = get_object_or_404(models.Consultation, slug=consultation_slug)
     try:
         processing_run = consultation.get_processing_run(processing_run_slug)
-    except models.ProcessingRun.DoesNotExist:
+        all_runs_for_consultation = models.ProcessingRun.objects.filter(consultation=consultation)
+    except models.ProcessingRun.DoesNotExist: # Should only have processing runs from that consultation
         return Http404
     if not processing_run:
         messages.info(request, NO_THEMES_YET_MESSAGE)
 
     questions = models.Question.objects.filter(section__consultation__slug=consultation_slug)
+
+    if request.POST:
+        processing_run_slug = processing_run_slug  # TODO - get the latest processing run slug
+        return redirect("consultation_run", consultation_slug=consultation_slug, processing_run_slug=processing_run_slug)
+
     context = {
         "questions": questions,
         "consultation": consultation,
         "processing_run": processing_run,
+        "all_runs": all_runs_for_consultation
     }
 
     return render(request, "consultations/consultations/show.html", context)
