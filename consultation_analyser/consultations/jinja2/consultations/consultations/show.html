@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{% from "macros.html" import processing_run_selector %}
 
 {% set page_title = consultation.name %}
 
@@ -18,44 +19,7 @@
 
   {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 
-  {% if all_runs|length == 1 %}
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full">
-        <div class="iai-panel">
-          <div class="govuk-form-group govuk-!-margin-bottom-3">
-            <label class="govuk-label" for="run">
-              Themes generated at: {{ datetime(all_runs[0].created_at)}}
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  {% elif all_runs %}
-    <div class="govuk-grid-row">
-      <div class="govuk-grid-column-full">
-          <div class="iai-panel">
-            <form>
-              <div class="govuk-form-group govuk-!-margin-bottom-3">
-                <label class="govuk-label" for="run">
-                  Themes generated at:
-                </label>
-                <select class="govuk-select" id="run" name="run">
-                  {% for run in all_runs %}
-                    <option value="{{ run.id }}" {% if processing_run.id|string == run.id|string %}selected{% endif %}>{{ datetime(run.created_at) }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-                {{ govukButton({
-                  "text": "Update",
-                  "classes": "govuk-!-margin-bottom-2"
-                }) }}
-            </form>
-          </div>
-      </div>
-    </div>
-  {% endif %}
+  {{ processing_run_selector(all_processing_runs=all_runs, selected_processing_run=processing_run) }}
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full">
