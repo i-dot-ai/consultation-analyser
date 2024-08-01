@@ -18,7 +18,20 @@
 
   {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 
-  {% if all_runs %}
+  {% if all_runs|length == 1 %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        <div class="iai-panel">
+          <div class="govuk-form-group govuk-!-margin-bottom-3">
+            <label class="govuk-label" for="run">
+              Themes generated at: {{ datetime(all_runs[0].created_at)}}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% elif all_runs %}
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-full">
           <div class="iai-panel">
