@@ -56,6 +56,7 @@ def show(
         processing_run = consultation.get_processing_run(processing_run_slug)
     except models.ProcessingRun.DoesNotExist:
         raise Http404
+    all_runs_for_consultation = models.ProcessingRun.objects.filter(consultation=consultation)
 
     question = models.Question.objects.get(
         slug=question_slug,
@@ -107,5 +108,6 @@ def show(
         "outlier_theme_id": outlier_theme.id if outlier_theme else None,
         "scatter_plot_data": scatter_plot_data,
         "processing_run": processing_run,
+        "all_runs": all_runs_for_consultation,
     }
     return render(request, "consultations/questions/show.html", context)

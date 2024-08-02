@@ -2,6 +2,7 @@
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{% from "macros.html" import processing_run_selector %}
 
 {% set page_title = "Question summary" %}
 
@@ -22,6 +23,8 @@
       }
     ]
   }) }}
+
+  {{ processing_run_selector(all_processing_runs=all_runs, selected_processing_run=processing_run) }}
 
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-full iai-grid">

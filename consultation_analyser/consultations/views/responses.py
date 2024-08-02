@@ -26,6 +26,7 @@ def index(
         processing_run = consultation.get_processing_run(processing_run_slug=processing_run_slug)
     except models.ProcessingRun.DoesNotExist:
         return Http404
+    all_runs_for_consultation = models.ProcessingRun.objects.filter(consultation=consultation)
 
     question = models.Question.objects.get(
         slug=question_slug,
@@ -57,6 +58,7 @@ def index(
         "applied_filters": applied_filters,
         "themes": themes_for_question,
         "pagination": current_page,
+        "all_runs_for_consultation": all_runs_for_consultation
     }
 
     return render(request, "consultations/responses/index.html", context)
