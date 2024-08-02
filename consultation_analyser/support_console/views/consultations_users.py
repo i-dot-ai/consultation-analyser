@@ -6,7 +6,6 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from consultation_analyser.consultations import models
-from consultation_analyser.support_console.decorators import support_login_required
 from consultation_analyser.support_console.forms.add_users_to_consultation_form import (
     AddUsersToConsultationForm,
 )

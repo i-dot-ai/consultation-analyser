@@ -9,13 +9,9 @@ class SupportAppStaffRequiredMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        return response
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
         if request.path.startswith("/support/"):
-            # if isinstance(request.user, AnonymousUser):
-            if not request.user:
+            if not request.user.is_authenticated:
                 return HttpResponseRedirect("/")
             elif not request.user.is_staff:
                 return HttpResponseRedirect("/")
-        return None
+        return response

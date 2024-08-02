@@ -3,7 +3,6 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, redirect, render
 
 from consultation_analyser.authentication.models import User
-from consultation_analyser.support_console.decorators import support_login_required
 
 from ..forms.edit_user_form import EditUserForm
 from ..forms.new_user_form import NewUserForm
