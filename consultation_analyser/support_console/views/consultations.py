@@ -15,7 +15,7 @@ from consultation_analyser.pipeline.processing import run_llm_summariser, run_pr
 from consultation_analyser.support_console.decorators import support_login_required
 
 
-@support_login_required
+# @support_login_required
 def index(request: HttpRequest) -> HttpResponse:
     if request.POST:
         try:
@@ -30,7 +30,7 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "support_console/consultations/index.html", context=context)
 
 
-@support_login_required
+# @support_login_required
 def delete(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     consultation = models.Consultation.objects.get(id=consultation_id)
     context = {

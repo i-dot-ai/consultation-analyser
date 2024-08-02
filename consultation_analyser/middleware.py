@@ -1,5 +1,4 @@
-from django.contrib.auth.models import AnonymousUser
-from django.http import Http404
+from django.http import HttpResponseRedirect
 
 
 class SupportAppStaffRequiredMiddleware:
@@ -14,8 +13,9 @@ class SupportAppStaffRequiredMiddleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if request.path.startswith("/support/"):
-            if isinstance(request.user, AnonymousUser):
-                return Http404
+            # if isinstance(request.user, AnonymousUser):
+            if not request.user:
+                return HttpResponseRedirect("/")
             elif not request.user.is_staff:
-                return Http404
+                return HttpResponseRedirect("/")
         return None

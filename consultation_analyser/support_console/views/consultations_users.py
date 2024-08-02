@@ -12,7 +12,7 @@ from consultation_analyser.support_console.forms.add_users_to_consultation_form 
 )
 
 
-@support_login_required
+# @support_login_required
 def new(request: HttpRequest, consultation_id: UUID):
     consultation = models.Consultation.objects.get(id=consultation_id)
     users = models.User.objects.exclude(id__in=[u.id for u in consultation.users.all()]).all()
@@ -35,7 +35,7 @@ def new(request: HttpRequest, consultation_id: UUID):
     return render(request, "support_console/consultations_users/new.html", context=context)
 
 
-@support_login_required
+# @support_login_required
 def delete(request: HttpRequest, consultation_id: UUID, user_id: UUID) -> HttpResponse:
     consultation = models.Consultation.objects.get(id=consultation_id)
     user = models.User.objects.get(id=user_id)

@@ -17,7 +17,6 @@ from pathlib import Path
 
 import environ
 
-from consultation_analyser.consultations.middleware import SupportAppStaffRequiredMiddleware
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -70,7 +69,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "waffle.middleware.WaffleMiddleware",
-	"SupportAppStaffRequiredMiddleware"
+	"consultation_analyser.middleware.SupportAppStaffRequiredMiddleware"
 ]
 
 ROOT_URLCONF = "consultation_analyser.urls"
