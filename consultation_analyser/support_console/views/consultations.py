@@ -12,10 +12,8 @@ from consultation_analyser.pipeline.backends.types import (
     NO_SUMMARY_STR,
 )
 from consultation_analyser.pipeline.processing import run_llm_summariser, run_processing_pipeline
-from consultation_analyser.support_console.decorators import support_login_required
 
 
-# @support_login_required
 def index(request: HttpRequest) -> HttpResponse:
     if request.POST:
         try:
@@ -30,7 +28,6 @@ def index(request: HttpRequest) -> HttpResponse:
     return render(request, "support_console/consultations/index.html", context=context)
 
 
-# @support_login_required
 def delete(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     consultation = models.Consultation.objects.get(id=consultation_id)
     context = {
@@ -60,7 +57,6 @@ def get_number_themes_for_processing_run(processing_run):
     return total_themes, total_with_summaries
 
 
-@support_login_required
 def show(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     consultation = models.Consultation.objects.get(id=consultation_id)
     try:
@@ -100,7 +96,6 @@ def show(request: HttpRequest, consultation_id: UUID) -> HttpResponse:
     return render(request, "support_console/consultations/show.html", context=context)
 
 
-@support_login_required
 def download(request: HttpRequest, consultation_slug: str, processing_run_slug: str):
     # If no processing_run, defaults to latest if exists
     consultation = models.Consultation.objects.get(slug=consultation_slug)
