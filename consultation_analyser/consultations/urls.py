@@ -42,7 +42,7 @@ urlpatterns = [
         name="question_responses_runs",
     ),
     # authentication
-    path("sign-in/", sessions.new),
-    path("sign-out/", sessions.destroy),
-    path("magic-link/", include(magic_link_urls)),
+    path("sign-in/", sessions.new, name="sign_in"),
+    path("sign-out/", sessions.destroy, name="sign_out"),
+    path("magic-link/", include(magic_link_urls), name="magic_link"),
 ]
