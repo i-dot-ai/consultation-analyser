@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, QuerySet
 from django.http import Http404, HttpRequest
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .. import models
 from .consultations import NO_THEMES_YET_MESSAGE

@@ -33,14 +33,11 @@ def index(request: HttpRequest) -> HttpResponse:
 def show(
     request: HttpRequest, consultation_slug: str, processing_run_slug: Optional[str] = None
 ) -> HttpResponse:
-    processing_run_id = request.GET.get("run")
     consultation = get_object_or_404(models.Consultation, slug=consultation_slug)
     all_runs_for_consultation = models.ProcessingRun.objects.filter(consultation=consultation)
     if all_runs_for_consultation.count() == 0:
         messages.info(request, NO_THEMES_YET_MESSAGE)
         processing_run = None
-    elif processing_run_id:
-        processing_run = models.ProcessingRun.objects.get(id=processing_run_id)
     else:
         try:
             processing_run = consultation.get_processing_run(processing_run_slug)
