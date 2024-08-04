@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, QuerySet
 from django.http import Http404, HttpRequest
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 
 from .. import models
 from .consultations import NO_THEMES_YET_MESSAGE
@@ -52,6 +52,16 @@ def show(
     processing_run_slug: Optional[str] = None,
 ):
     consultation = get_object_or_404(models.Consultation, slug=consultation_slug)
+    processing_run_id = request.GET.get("run")
+    if processing_run_id:
+        processing_run = models.ProcessingRun.objects.get(id=processing_run_id)
+        kwargs = {
+            "consultation_slug": consultation_slug,
+            "processing_run_slug": processing_run.slug,
+            "section_slug": section_slug,
+            "question_slug": question_slug,
+        }
+        return redirect("show_question_runs", **kwargs)
     try:
         processing_run = consultation.get_processing_run(processing_run_slug)
     except models.ProcessingRun.DoesNotExist:
