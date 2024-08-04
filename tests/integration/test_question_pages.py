@@ -74,7 +74,7 @@ def test_consultation_page_multiple_runs(django_app):
     consultation_slug = consultation.slug
     homepage_default = django_app.get(
         f"/consultations/{consultation_slug}/sections/{section.slug}/questions/{question.slug}/"
-    ) # latest run
+    )  # latest run
     assert "Themes generated at" in homepage_default.text
     assert "2 March 2024 at 11:00" in homepage_default.text
 
@@ -82,6 +82,6 @@ def test_consultation_page_multiple_runs(django_app):
         f"/consultations/{consultation_slug}/sections/{section.slug}/questions/{question.slug}/?run={processing_run_1.id}",
     )
     assert response.status_code == 302
-    assert processing_run_1.slug in str(response.url) # redirect to the correct processing run
+    assert processing_run_1.slug in str(response.url)  # redirect to the correct processing run
     new_page = response.follow()
     assert "1 January 2023 at 12:30" in new_page.text
