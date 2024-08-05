@@ -1,0 +1,40 @@
+{%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+
+{% macro processing_run_selector(all_processing_runs, selected_processing_run) %}
+  {% if all_processing_runs|length == 1 %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+        <div class="iai-panel">
+          <div class="govuk-form-group govuk-!-margin-bottom-3">
+            <label class="govuk-label" for="run">
+              Themes generated at: {{ datetime(all_processing_runs[0].created_at) }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% elif all_processing_runs %}
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-full">
+          <div class="iai-panel">
+            <form>
+              <div class="govuk-form-group govuk-!-margin-bottom-3">
+                <label class="govuk-label" for="run">
+                  Themes generated at:
+                </label>
+                <select class="govuk-select" id="run" name="run">
+                  {% for run in all_processing_runs %}
+                    <option value="{{ run.id }}" {% if selected_processing_run.id|string == run.id|string %}selected{% endif %}>{{ datetime(run.created_at) }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+                {{ govukButton({
+                  "text": "Update",
+                  "classes": "govuk-!-margin-bottom-2"
+                }) }}
+            </form>
+          </div>
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}

@@ -2,6 +2,7 @@
 {%- from 'govuk_frontend_jinja/components/back-link/macro.html' import govukBackLink -%}
 {%- from "govuk_frontend_jinja/components/breadcrumbs/macro.html" import govukBreadcrumbs -%}
 {%- from 'govuk_frontend_jinja/components/button/macro.html' import govukButton -%}
+{% from "macros.html" import processing_run_selector %}
 
 {% set page_title = "Response explorer" %}
 
@@ -21,7 +22,9 @@
     ]
   }) }}
 
-  <div class="govuk-grid-row govuk-!-margin-top-5">
+  {{ processing_run_selector(all_processing_runs=all_runs, selected_processing_run=processing_run) }}
+
+  <div class="govuk-grid-row govuk-!-margin-top-6">
     <div class="govuk-grid-column-full">
       <div class="iai-panel">
         <h1 class="govuk-heading-m govuk-!-font-weight-regular">
@@ -32,7 +35,7 @@
     </div>
   </div>
 
-  <div class="govuk-grid-row govuk-!-margin-top-5">
+  <div class="govuk-grid-row govuk-!-margin-top-6">
 
     <div class="govuk-grid-column-one-quarter-from-desktop">
       <div class="iai-panel govuk-!-margin-bottom-5">
@@ -56,7 +59,7 @@
               {#<option {% if applied_filters.theme == "No theme" %}selected{% endif %}>No theme</option>#}
             </select>
           </div>
-         
+
             {{ govukButton({
               "text": "Apply filters",
               "classes": "govuk-!-margin-bottom-2"

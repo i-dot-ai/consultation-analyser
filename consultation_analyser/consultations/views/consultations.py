@@ -34,20 +34,25 @@ def show(
     request: HttpRequest, consultation_slug: str, processing_run_slug: Optional[str] = None
 ) -> HttpResponse:
     consultation = get_object_or_404(models.Consultation, slug=consultation_slug)
-    try:
-        processing_run = consultation.get_processing_run(processing_run_slug)
-    except models.ProcessingRun.DoesNotExist:
-        return Http404
-    if not processing_run:
+    all_runs_for_consultation = models.ProcessingRun.objects.filter(consultation=consultation)
+    if all_runs_for_consultation.count() == 0:
         messages.info(request, NO_THEMES_YET_MESSAGE)
+        processing_run = None
+    else:
+        try:
+            processing_run = consultation.get_processing_run(processing_run_slug)
+        except (
+            models.ProcessingRun.DoesNotExist
+        ):  # Should only have processing runs from that consultation
+            return Http404
 
     questions = models.Question.objects.filter(section__consultation__slug=consultation_slug)
     context = {
         "questions": questions,
         "consultation": consultation,
         "processing_run": processing_run,
+        "all_runs": all_runs_for_consultation,
     }
-
     return render(request, "consultations/consultations/show.html", context)
 
 
