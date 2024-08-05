@@ -4,12 +4,12 @@ from django.urls import path
 from .views import consultations, consultations_users, pages, users
 
 urlpatterns = [
-    path("", lambda request: redirect("/support/consultations/")),
-    path("sign-out/", pages.sign_out),
-    path("users/", users.index),
-    path("users/new/", users.new),
-    path("users/<int:user_id>/", users.show),
-    path("consultations/", consultations.index),
+    path("", lambda request: redirect("/support/consultations/"), name="support"),
+    path("sign-out/", pages.sign_out, name="support_sign_out"),
+    path("users/", users.index, name="users"),
+    path("users/new/", users.new, name="new_user"),
+    path("users/<int:user_id>/", users.show, name="user"),
+    path("consultations/", consultations.index, name="support_consultations"),
     path("consultations/<uuid:consultation_id>/", consultations.show, name="support_consultation"),
     path(
         "consultations/<uuid:consultation_id>/delete/",
