@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.urls import path
 
-from .views import consultations, consultations_users, pages, users
+from .views import api, consultations, consultations_users, pages, users
 
 urlpatterns = [
     path("", lambda request: redirect("/support/consultations/")),
@@ -9,6 +9,7 @@ urlpatterns = [
     path("users/", users.index),
     path("users/new/", users.new),
     path("users/<int:user_id>/", users.show),
+    path("me/", users.my_account),
     path("consultations/", consultations.index),
     path("consultations/<uuid:consultation_id>/", consultations.show, name="support_consultation"),
     path(
@@ -31,4 +32,7 @@ urlpatterns = [
         consultations.download,
         name="download_consultation",
     ),
+    # api
+    path("api/hello-world/", api.hello_world),
+    path("api/upload-data/", api.upload_json_data),
 ]

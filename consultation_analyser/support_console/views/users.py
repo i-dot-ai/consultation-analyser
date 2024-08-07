@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from consultation_analyser.authentication.models import User
 from consultation_analyser.support_console.decorators import support_login_required
@@ -51,3 +52,12 @@ def show(request: HttpRequest, user_id: int):
         "support_console/users/show.html",
         {"user": user, "consultations": consultations, "form": form},
     )
+
+
+@support_login_required
+def my_account(request: HttpRequest):
+    user = request.user
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+    context = {"jwt_token": access_token}
+    return render(request, "support_console/users/my_account.html", context=context)
